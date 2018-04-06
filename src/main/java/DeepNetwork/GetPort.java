@@ -7,9 +7,8 @@ public class GetPort {
     private static int[] array;
     private static int dead;
     private static int used;
-    private static int last;
     private static int min = 6000;
-    private static int max = 7000;
+    //private static int max = 7000;
 
     public GetPort(){
         array = new int[1000];
@@ -24,15 +23,15 @@ public class GetPort {
         ServerSocket serverSocket;
         ServerPort ret;
         while (true) {
-            try {
                 index = get();
                 port = array[index];
-                used(index);
+            try {
                 serverSocket = new ServerSocket(port);
+                used(index);
                 ret = new ServerPort(port, serverSocket);
                 return ret;
             } catch (Exception e) {
-                dead();
+                dead(index);
             }
         }
     }
@@ -48,32 +47,22 @@ public class GetPort {
             dead = array.length;
             System.out.println("Out of available ports");
         }
-        dead--; //todo maybe make this decrement after so that we're always pointing to a valid element?
+        dead--;
         swap(index, dead);
+        used(index);
     }
 
-    private static void dead(){
-        if(dead == 0) {
-            dead = array.length;
-            System.out.println("Out of available ports");
-        }
-        dead--;
-        swap(last,dead);
-    }
 
     private static void used(int index){
-
+        if(used == 0)
+            used = dead - 1;
         used--;
         swap(index,used);
     }
 
     private static int get(){
-        if(used == 0)
-            used = dead - 1;
-
         Random rand = new Random();
         int index = rand.nextInt(used);
-        last = index;
         return index;
     }
 }

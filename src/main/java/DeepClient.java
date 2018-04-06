@@ -4,9 +4,11 @@
 	Dr. Linda Null
 	COMP 512
 -------------------------------*/
-import DeepNetwork.DeepHash;
+
+import DeepNetwork.GetTorrentFileRequest;
 import DeepNetwork.GetTorrentListRequest;
 import DeepNetwork.GetTorrentListResponse;
+import DeepNetwork.Request;
 
 import java.net.*;
 import java.io.*;
@@ -68,5 +70,19 @@ class DeepClient {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static Thread getDeepThread(Request request, ServerSocket s){
+        //Thread manager
+        //static int?
+        if(request instanceof GetTorrentListRequest){
+            return new TorrentListThread(s);
+        }
+
+        if(request instanceof GetTorrentFileRequest){
+            //return new TorrentFileThread(request, port);
+        }
+
+        return null;
     }
 }

@@ -18,7 +18,9 @@ class DeepServer {
     public static void main(String [] args) {
 
         ServerStartup.main(null);
+
         int x;
+
         try {
             ServerSocket serverSocket = new ServerSocket(PORT);
             //serverSocket.setSoTimeout(10000);
@@ -38,7 +40,7 @@ class DeepServer {
         }
     }
 
-    private static int reception(Socket socket) throws IOException {
+    private static int reception(Socket socket) {
         try {
             ObjectInputStream stream = new ObjectInputStream(socket.getInputStream());
             Object object = stream.readObject();
@@ -73,41 +75,10 @@ class DeepServer {
         }
 
         if(request instanceof GetTorrentFileRequest){
-            //return new TorrentFileThread(request, port);
+            return new TorrentFileThread(s);
         }
 
         return null;
     }
-
-//    public void run() {
-//        while(true) {
-//            try {
-//                System.out.println("Waiting for client on port " + serverSocket.getLocalPort() + "...");
-//                Socket server = serverSocket.accept();
-//
-//                //System.out.println("Just connected to " + server.getRemoteSocketAddress());
-//                DataInputStream in = new DataInputStream(server.getInputStream());
-//                String user_string = in.readUTF();
-//                System.out.println("Message received: " + user_string);
-//                String hash = DeepHash.getHash(user_string);
-//                System.out.println("Message hashed: " + hash);
-//
-//                DataOutputStream out = new DataOutputStream(server.getOutputStream());
-//                out.writeUTF(hash);
-//                server.close();
-//
-//            } catch (SocketTimeoutException s) {
-//                System.out.println("Socket timed out!");
-//                break;
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//                break;
-//            } catch (Exception e){
-//                System.out.println("Hash error?");
-//                e.printStackTrace();
-//                break;
-//            }
-//        }
-//    }
 
 }
