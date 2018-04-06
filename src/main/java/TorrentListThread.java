@@ -9,8 +9,8 @@ import java.net.Socket;
 public class TorrentListThread extends Thread{
     private ServerSocket responseSocket;
 
-    TorrentListThread(ServerSocket re){
-        this.responseSocket = re;
+    TorrentListThread(ServerSocket responseSocket){
+        this.responseSocket = responseSocket;
     }
 
     @Override
@@ -20,7 +20,7 @@ public class TorrentListThread extends Thread{
             Socket socket = responseSocket.accept();
 
             //Retrieve data
-            GetTorrentListResponse response = new GetTorrentListResponse(TorrentList.get());
+            GetTorrentListResponse response = TorrentList.get();
 
             //Send data back
             ObjectOutputStream stream = new ObjectOutputStream(socket.getOutputStream());

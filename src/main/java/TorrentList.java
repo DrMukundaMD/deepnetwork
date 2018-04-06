@@ -1,3 +1,5 @@
+import DeepNetwork.GetTorrentListResponse;
+
 import java.io.*;
 import java.util.ArrayList;
 
@@ -23,10 +25,11 @@ public class TorrentList {
     }
     //todo this shit might be awesome with a gson object
     public static void add(String torrent){
+        torrents.add(torrent);
     }
 
-    public static ArrayList get(){
-        return torrents;
+    public static synchronized GetTorrentListResponse get(){
+        return new GetTorrentListResponse(torrents);
     }
 
 }

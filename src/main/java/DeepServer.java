@@ -16,21 +16,22 @@ class DeepServer {
     private static final int PORT = 6345;
 
     public static void main(String [] args) {
-
+        //Start up stuff
         ServerStartup.main(null);
 
-        int x;
 
         try {
             ServerSocket serverSocket = new ServerSocket(PORT);
-            //serverSocket.setSoTimeout(10000);
+            serverSocket.setSoTimeout(10000);
+            int newPort;
             Socket socket;
             System.out.println("Server Started");
+
             while(true){
                 socket = serverSocket.accept();
-                x = reception(socket);
+                newPort = reception(socket);
                 DataOutputStream r = new DataOutputStream(socket.getOutputStream());
-                r.writeInt(x);
+                r.writeInt(newPort);
                 socket.close();
             }
 
@@ -45,10 +46,10 @@ class DeepServer {
             ObjectInputStream stream = new ObjectInputStream(socket.getInputStream());
             Object object = stream.readObject();
             ServerPort s = GetPort.getPort();
-            System.out.println("got port # " + s.getPort());
+            //System.out.println("got port # " + s.getPort());
 
             if (object instanceof Request) {
-                Thread deepThread = getDeepThread((Request) object, s.getS()); // todo fix select port
+                Thread deepThread = getRequestThread((Request) object, s.getS());
                 deepThread.start();
             }
 
@@ -67,7 +68,7 @@ class DeepServer {
         return 6344; //todo delete
     }
 
-    private static Thread getDeepThread(Request request, ServerSocket s){
+    private static Thread getRequestThread(Request request, ServerSocket s){
         //Thread manager
         //static int?
         if(request instanceof GetTorrentListRequest){
@@ -78,7 +79,11 @@ class DeepServer {
             return new TorrentFileThread(s);
         }
 
-        return null;
+        if(request instanceof GetPeersRequest){
+            return new GetPeersThread(s);
+        }
+
+        return new UnknownRequestThread(s);
     }
 
 }

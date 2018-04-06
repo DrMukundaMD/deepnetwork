@@ -1,14 +1,15 @@
 import DeepNetwork.GetTorrentFileResponse;
+import DeepNetwork.UnknownRequestResponse;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class TorrentFileThread extends Thread {
+public class UnknownRequestThread extends Thread{
     private ServerSocket responseSocket;
 
-    TorrentFileThread(ServerSocket responseSocket){
+    UnknownRequestThread(ServerSocket responseSocket){
         this.responseSocket = responseSocket;
     }
 
@@ -18,8 +19,8 @@ public class TorrentFileThread extends Thread {
             //Accept connections
             Socket socket = responseSocket.accept();
 
-            //Set Response todo
-            GetTorrentFileResponse response = new GetTorrentFileResponse("","");
+            //Set Response
+            UnknownRequestResponse response = new UnknownRequestResponse();
 
             //Reply
             ObjectOutputStream stream = new ObjectOutputStream(socket.getOutputStream());
