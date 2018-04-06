@@ -17,7 +17,7 @@ class DeepServer {
     private static final int PORT = 6345;
 
     public static void main(String [] args) {
-        //Start up stuff
+        //Start
         ServerStartup.main(null);
 
         try {
@@ -39,15 +39,14 @@ class DeepServer {
 
         } catch (IOException e) {
             e.printStackTrace();
-            //Log
         }
     }
 
     private static int reception(Socket socket) {
         try {
+            // Read object
             ObjectInputStream stream = new ObjectInputStream(socket.getInputStream());
             Object object = stream.readObject();
-            //System.out.println("got port # " + s.getPort());
 
             if (object instanceof Request) {
                 ServerPort s = GetPort.getPort();
@@ -67,19 +66,19 @@ class DeepServer {
         return -1;
     }
 
-    private static Thread getRequestThread(Request request, ServerSocket s){
+    private static Thread getRequestThread(Request r, ServerSocket s){
         //Thread manager
         //static int?
-        if(request instanceof GetTorrentListRequest){
+        if(r instanceof GetTorrentListRequest){
             return new TorrentListThread(s);
         }
 
-        if(request instanceof GetTorrentFileRequest){
-            return new TorrentFileThread(s, request);
+        if(r instanceof GetTorrentFileRequest){
+            return new TorrentFileThread(s, r);
         }
 
-        if(request instanceof GetPeersRequest){
-            return new GetPeersThread(s, request);
+        if(r instanceof GetPeersRequest){
+            return new GetPeersThread(s, r);
         }
 
         return new UnknownRequestThread(s);
