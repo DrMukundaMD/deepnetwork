@@ -20,13 +20,12 @@ class DeepServer {
         //Start up stuff
         ServerStartup.main(null);
 
-
         try {
             ServerSocket serverSocket = new ServerSocket(PORT);
             serverSocket.setSoTimeout(10000);
             int newPort;
             Socket socket;
-            System.out.println("Server Started");
+            System.out.println("~DeepServer Started~");
 
             while(true){
                 socket = serverSocket.accept();
@@ -87,7 +86,7 @@ class DeepServer {
     }
 
     private static Thread getResponseThread(Response r){
-        if(r instanceof Log){
+        if(r instanceof LogPeer){
             //return new LogThread(s);
         }
         return null;
