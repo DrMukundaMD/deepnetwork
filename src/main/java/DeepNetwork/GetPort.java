@@ -62,7 +62,6 @@ public class GetPort {
 
     private static int get(){
         Random rand = new Random();
-        int index = rand.nextInt(used);
-        return index;
+        return rand.nextInt(used);
     }
 }

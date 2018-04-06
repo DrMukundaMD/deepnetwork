@@ -24,7 +24,7 @@ public class GetPeersThread extends Thread{
             //Accept connections
             Socket socket = responseSocket.accept();
 
-            //Set Response todo
+            //Set Response
             GetPeersResponse response = Peers.get(request.getFilename());
 
             //Reply
@@ -37,7 +37,7 @@ public class GetPeersThread extends Thread{
 
         } catch (IOException e){
             e.printStackTrace();
-
+            //todo log
         }
     }
 }

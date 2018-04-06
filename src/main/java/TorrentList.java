@@ -4,11 +4,11 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class TorrentList {
-    private static File file;
+    //private static File file;
     private static ArrayList<String> torrents;
 
     TorrentList(ArrayList<String> torrents){
-        file = new File(TorrentFolder.getTorrents(),".torrents");
+        File file = new File(TorrentFolder.getTorrents(),".torrents");
         this.torrents = torrents;
 
         try{
@@ -26,6 +26,10 @@ public class TorrentList {
     //todo this shit might be awesome with a gson object
     public static void add(String torrent){
         torrents.add(torrent);
+    }
+
+    public static void remove(String torrent){
+        torrents.remove(torrent);
     }
 
     public static synchronized GetTorrentListResponse get(){
