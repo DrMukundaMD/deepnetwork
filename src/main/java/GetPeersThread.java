@@ -1,5 +1,7 @@
+import DeepNetwork.GetPeersRequest;
 import DeepNetwork.GetPeersResponse;
 import DeepNetwork.GetTorrentFileResponse;
+import DeepNetwork.Request;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -9,9 +11,11 @@ import java.util.ArrayList;
 
 public class GetPeersThread extends Thread{
     private ServerSocket responseSocket;
+    private GetPeersRequest request;
 
-    GetPeersThread(ServerSocket responseSocket){
+    GetPeersThread(ServerSocket responseSocket, Request request){
         this.responseSocket = responseSocket;
+        this.request = (GetPeersRequest) request;
     }
 
     @Override
@@ -21,7 +25,7 @@ public class GetPeersThread extends Thread{
             Socket socket = responseSocket.accept();
 
             //Set Response todo
-            GetPeersResponse response = new GetPeersResponse("",new ArrayList<String>());
+            GetPeersResponse response = Peers.get(request.getFilename());
 
             //Reply
             ObjectOutputStream stream = new ObjectOutputStream(socket.getOutputStream());

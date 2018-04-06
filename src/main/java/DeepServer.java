@@ -80,7 +80,7 @@ class DeepServer {
         }
 
         if(request instanceof GetPeersRequest){
-            return new GetPeersThread(s);
+            return new GetPeersThread(s, request);
         }
 
         return new UnknownRequestThread(s);
