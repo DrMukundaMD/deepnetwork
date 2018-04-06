@@ -7,9 +7,10 @@
 import DeepNetwork.*;
 
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.net.*;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.ServerSocket;
 
 
 class DeepServer {
@@ -30,8 +31,10 @@ class DeepServer {
             while(true){
                 socket = serverSocket.accept();
                 newPort = reception(socket);
-                DataOutputStream r = new DataOutputStream(socket.getOutputStream());
-                r.writeInt(newPort);
+                if(newPort != -1) {
+                    DataOutputStream r = new DataOutputStream(socket.getOutputStream());
+                    r.writeInt(newPort);
+                }
                 socket.close();
             }
 
@@ -45,27 +48,24 @@ class DeepServer {
         try {
             ObjectInputStream stream = new ObjectInputStream(socket.getInputStream());
             Object object = stream.readObject();
-            ServerPort s = GetPort.getPort();
             //System.out.println("got port # " + s.getPort());
 
             if (object instanceof Request) {
+                ServerPort s = GetPort.getPort();
                 Thread deepThread = getRequestThread((Request) object, s.getS());
                 deepThread.start();
+                return s.getPort();
             }
 
             if (object instanceof Response) {
-                //Thread deepThread = log((Response) object); // todo fix log
-                //deepThread.start();
-                while(true){break;}
+                Thread deepThread = getResponseThread((Response) object);
+                deepThread.start();
             }
-
-            return s.getPort();
-
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            //Logger.debug(e.getMessage());
         }
-        return 6344; //todo delete
+
+        return -1;
     }
 
     private static Thread getRequestThread(Request request, ServerSocket s){
@@ -76,7 +76,7 @@ class DeepServer {
         }
 
         if(request instanceof GetTorrentFileRequest){
-            return new TorrentFileThread(s);
+            return new TorrentFileThread(s, request);
         }
 
         if(request instanceof GetPeersRequest){
@@ -84,6 +84,13 @@ class DeepServer {
         }
 
         return new UnknownRequestThread(s);
+    }
+
+    private static Thread getResponseThread(Response r){
+        if(r instanceof Log){
+            //return new LogThread(s);
+        }
+        return null;
     }
 
 }
