@@ -37,6 +37,7 @@ public class CreateTorrentFile {
             bStream.close();
         } catch (Exception e) {
             e.printStackTrace();
+            DeepLogger.log(e.getMessage());
         }
 
         // Create .torrent file
@@ -52,6 +53,7 @@ public class CreateTorrentFile {
         }
         catch (Exception e){
             e.printStackTrace();
+            DeepLogger.log(e.getMessage());
         }
     }
 
@@ -62,6 +64,7 @@ public class CreateTorrentFile {
         }
         catch (Exception e){
             e.printStackTrace();
+            DeepLogger.log(e.getMessage());
         }
     }
 }

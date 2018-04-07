@@ -20,7 +20,7 @@ public class TorrentList {
             objectStream.close();
         } catch (IOException e){
             e.printStackTrace();
-            //--log
+            DeepLogger.log(e.getMessage());
         }
     }
     //todo this shit might be awesome with a gson object

@@ -37,7 +37,7 @@ public class GetPeersThread extends Thread{
 
         } catch (IOException e){
             e.printStackTrace();
-            //todo log
+            DeepLogger.log(e.getMessage());
         }
     }
 }

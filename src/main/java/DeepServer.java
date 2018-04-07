@@ -39,6 +39,7 @@ class DeepServer {
 
         } catch (IOException e) {
             e.printStackTrace();
+            DeepLogger.log(e.getMessage());
         }
     }
 
@@ -61,6 +62,7 @@ class DeepServer {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            DeepLogger.log(e.getMessage());
         }
 
         return -1;

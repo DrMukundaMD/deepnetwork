@@ -32,6 +32,7 @@ public class UnknownRequestThread extends Thread{
 
         } catch (IOException e){
             e.printStackTrace();
+            DeepLogger.log(e.getMessage());
 
         }
     }

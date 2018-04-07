@@ -69,6 +69,7 @@ class DeepClient {
             client.close();
         } catch (Exception e) {
             e.printStackTrace();
+            DeepLogger.log(e.getMessage());
         }
     }
 

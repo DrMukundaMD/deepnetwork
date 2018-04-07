@@ -19,6 +19,7 @@ public class MakeTorrents {
             }
         } catch (Exception e){
             e.printStackTrace();
+            DeepLogger.log(e.getMessage());
         }
         return torrents;
     }

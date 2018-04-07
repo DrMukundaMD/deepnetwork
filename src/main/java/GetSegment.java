@@ -21,11 +21,9 @@ public class GetSegment {
                 return buffer;
             }
 
-        } catch (FileNotFoundException e){
-            System.out.println("Unable to locate segment file: " + filename + ", number: " + num);
-            e.printStackTrace();
         } catch (Exception e){
             e.printStackTrace();
+            DeepLogger.log(e.getMessage());
         }
 
         return null;
