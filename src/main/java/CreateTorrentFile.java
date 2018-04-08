@@ -1,4 +1,6 @@
 import DeepNetwork.DeepHash;
+import DeepThread.DeepLogger;
+import DeepThread.TorrentFolder;
 import com.google.gson.Gson;
 
 import java.io.BufferedInputStream;

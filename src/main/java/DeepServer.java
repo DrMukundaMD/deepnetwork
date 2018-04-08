@@ -5,6 +5,7 @@
 	COMP 512
 -------------------------------*/
 import DeepNetwork.*;
+import DeepThread.*;
 
 import java.io.DataOutputStream;
 import java.io.ObjectInputStream;

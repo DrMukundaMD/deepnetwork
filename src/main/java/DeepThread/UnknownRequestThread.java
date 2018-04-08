@@ -1,21 +1,18 @@
-import DeepNetwork.GetPeersRequest;
-import DeepNetwork.GetPeersResponse;
-import DeepNetwork.GetTorrentFileResponse;
-import DeepNetwork.Request;
+package DeepThread;
+
+import DeepNetwork.UnknownRequestResponse;
+import DeepThread.DeepLogger;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 
-public class GetPeersThread extends Thread{
+public class UnknownRequestThread extends Thread{
     private ServerSocket responseSocket;
-    private GetPeersRequest request;
 
-    GetPeersThread(ServerSocket responseSocket, Request request){
+    public UnknownRequestThread(ServerSocket responseSocket){
         this.responseSocket = responseSocket;
-        this.request = (GetPeersRequest) request;
     }
 
     @Override
@@ -25,7 +22,7 @@ public class GetPeersThread extends Thread{
             Socket socket = responseSocket.accept();
 
             //Set Response
-            GetPeersResponse response = Peers.get(request.getFilename());
+            UnknownRequestResponse response = new UnknownRequestResponse();
 
             //Reply
             ObjectOutputStream stream = new ObjectOutputStream(socket.getOutputStream());
@@ -38,6 +35,7 @@ public class GetPeersThread extends Thread{
         } catch (IOException e){
             e.printStackTrace();
             DeepLogger.log(e.getMessage());
+
         }
     }
 }

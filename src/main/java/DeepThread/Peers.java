@@ -1,3 +1,5 @@
+package DeepThread;
+
 import DeepNetwork.GetPeersResponse;
 
 import java.util.ArrayList;
@@ -6,7 +8,7 @@ import java.util.HashMap;
 public class Peers {
     private static HashMap<String,ArrayList<String>> map;
 
-    Peers() {
+    public Peers() {
         map = new HashMap<>();
     }
 

@@ -1,4 +1,7 @@
+package DeepThread;
+
 import DeepNetwork.GetTorrentFileResponse;
+import DeepThread.DeepLogger;
 import com.google.gson.Gson;
 
 import java.io.File;

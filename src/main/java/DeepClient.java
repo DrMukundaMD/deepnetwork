@@ -9,6 +9,8 @@ import DeepNetwork.GetTorrentFileRequest;
 import DeepNetwork.GetTorrentListRequest;
 import DeepNetwork.GetTorrentListResponse;
 import DeepNetwork.Request;
+import DeepThread.DeepLogger;
+import DeepThread.TorrentListThread;
 
 import java.net.*;
 import java.io.*;

@@ -1,4 +1,6 @@
 import DeepNetwork.GetPort;
+import DeepThread.TorrentFolder;
+import DeepThread.TorrentList;
 
 import java.util.ArrayList;
 

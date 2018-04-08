@@ -1,3 +1,6 @@
+import DeepThread.DeepLogger;
+import DeepThread.TorrentFolder;
+
 import java.io.File;
 import java.util.ArrayList;
 

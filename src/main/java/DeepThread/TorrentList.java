@@ -1,4 +1,8 @@
+package DeepThread;
+
 import DeepNetwork.GetTorrentListResponse;
+import DeepThread.DeepLogger;
+import DeepThread.TorrentFolder;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -7,7 +11,7 @@ public class TorrentList {
     //private static File file;
     private static ArrayList<String> torrents;
 
-    TorrentList(ArrayList<String> torrents){
+    public TorrentList(ArrayList<String> torrents){
         File file = new File(TorrentFolder.getTorrents(),".torrents");
         this.torrents = torrents;
 

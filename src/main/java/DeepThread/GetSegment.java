@@ -1,8 +1,11 @@
+package DeepThread;
+
+import DeepThread.DeepLogger;
+import DeepThread.TorrentFolder;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 public class GetSegment {
     public static byte[] getSegment(String filename, int num){
