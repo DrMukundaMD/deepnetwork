@@ -1,6 +1,3 @@
-import DeepNetwork.GetPort;
-
-import java.util.ArrayList;
 
 public class ClientStartup {
     public static void main(String[] args){

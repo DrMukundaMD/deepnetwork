@@ -32,8 +32,6 @@ public class TorrentList {
         torrents.remove(torrent);
     }
 
-    public static synchronized GetTorrentListResponse get(){
-        return new GetTorrentListResponse(torrents);
-    }
+    public static synchronized GetTorrentListResponse get(){ return new GetTorrentListResponse(torrents); }
 
 }
