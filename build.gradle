@@ -1,5 +1,5 @@
 group 'com.deepnetwork'
-version 'client'
+version 'server'
 
 apply plugin: 'java'
 apply plugin: 'application'
@@ -15,5 +15,5 @@ dependencies {
     compile 'com.google.code.gson:gson:2.2.+'
 }
 
-//mainClassName = 'DeepServer'
-mainClassName = 'DeepClient'
+mainClassName = 'DeepServer'
+//mainClassName = 'DeepClient'

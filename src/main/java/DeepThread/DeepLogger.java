@@ -20,6 +20,7 @@ public class DeepLogger {
             fileHandler.setFormatter(new SimpleFormatter());
             LOGGER.addHandler(fileHandler);
             LOGGER.setLevel(Level.FINE);
+            System.out.println(("DeepLogger started at "+ time));
         } catch (IOException e){
             System.out.println("Unable to start DeepLogger");
             e.printStackTrace();

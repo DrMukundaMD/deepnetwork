@@ -23,7 +23,7 @@ class DeepServer {
 
         try {
             ServerSocket serverSocket = new ServerSocket(PORT);
-            serverSocket.setSoTimeout(10000);
+            //serverSocket.setSoTimeout(10000); //this is 10 seconds
             int newPort;
             Socket socket;
             System.out.println("~DeepServer Started~");
