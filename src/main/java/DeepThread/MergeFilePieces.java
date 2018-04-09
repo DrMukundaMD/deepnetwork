@@ -41,7 +41,6 @@ public class MergeFilePieces {
                         br.close();
                     } catch (FileNotFoundException e) {
                         DeepLogger.log(e.getMessage());
-                        e.printStackTrace();
                         break;
                     }
                     // Iterate file segment
@@ -51,11 +50,10 @@ public class MergeFilePieces {
                 fileChannel.close();
             } catch (IOException e){
                 DeepLogger.log(e.getMessage());
-                e.printStackTrace();
             }
         } else {
             DeepLogger.log("Torrent not found: " + filename);
-            System.out.println("Torrent not found: " + filename);
+            //Server response
         }
     }
 }

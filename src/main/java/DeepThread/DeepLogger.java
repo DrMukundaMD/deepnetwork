@@ -16,11 +16,11 @@ public class DeepLogger {
         if(!logs.exists())
             logs.mkdir();
         try{
-            FileHandler fileHandler = new FileHandler(logs.toString() + time + "_log.log", true);
+            FileHandler fileHandler = new FileHandler(logs.toString() + File.separator + time + ".log", true);
             fileHandler.setFormatter(new SimpleFormatter());
             LOGGER.addHandler(fileHandler);
             LOGGER.setLevel(Level.FINE);
-            System.out.println(("DeepLogger started at "+ time));
+            System.out.println(("~DeepLogger started at "+ time + "~"));
         } catch (IOException e){
             System.out.println("Unable to start DeepLogger");
             e.printStackTrace();

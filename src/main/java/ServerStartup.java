@@ -15,6 +15,5 @@ public class ServerStartup {
         new TorrentList(torrents);
         new GetPort();
         new DeepLogger(System.currentTimeMillis());
-        MergeFilePieces.merge("test.jpg");
     }
 }
