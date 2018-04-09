@@ -13,7 +13,7 @@ public class DeepLogger {
 
     public DeepLogger(Long time){
         logs = new File(".logs");
-        if(logs.exists())
+        if(!logs.exists())
             logs.mkdir();
         try{
             FileHandler fileHandler = new FileHandler(logs.toString() + time + "_log.log", true);

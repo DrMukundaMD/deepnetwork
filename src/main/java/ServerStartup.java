@@ -14,7 +14,7 @@ public class ServerStartup {
         ArrayList<String> torrents = MakeTorrents.makeAllTorrents();
         new TorrentList(torrents);
         new GetPort();
-        //new DeepLogger(System.currentTimeMillis());
+        new DeepLogger(System.currentTimeMillis());
         MergeFilePieces.merge("test.jpg");
     }
 }
