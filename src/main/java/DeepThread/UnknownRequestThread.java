@@ -10,8 +10,10 @@ import java.net.Socket;
 
 public class UnknownRequestThread extends Thread{
     private ServerSocket responseSocket;
+    private ThreadStuff callingThread;
 
-    public UnknownRequestThread(ServerSocket responseSocket){
+    public UnknownRequestThread(ThreadStuff callingThread, ServerSocket responseSocket){
+        this.callingThread = callingThread;
         this.responseSocket = responseSocket;
     }
 
@@ -37,5 +39,7 @@ public class UnknownRequestThread extends Thread{
             DeepLogger.log(e.getMessage());
 
         }
+
+        callingThread.closeThread();
     }
 }

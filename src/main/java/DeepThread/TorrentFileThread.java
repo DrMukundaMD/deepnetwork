@@ -13,8 +13,10 @@ import java.net.Socket;
 public class TorrentFileThread extends Thread {
     private ServerSocket responseSocket;
     private GetTorrentFileRequest request;
+    private ThreadStuff callingThread;
 
-    public TorrentFileThread(ServerSocket responseSocket, Request request){
+    public TorrentFileThread(ThreadStuff callingThread, ServerSocket responseSocket, Request request){
+        this.callingThread = callingThread;
         this.responseSocket = responseSocket;
         this.request = (GetTorrentFileRequest) request;
     }
@@ -41,5 +43,6 @@ public class TorrentFileThread extends Thread {
             DeepLogger.log(e.getMessage());
 
         }
+        callingThread.closeThread();
     }
 }

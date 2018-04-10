@@ -12,10 +12,12 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 public class GetPeersThread extends Thread{
-    private ServerSocket responseSocket;
     private GetPeersRequest request;
+    private ThreadStuff callingThread;
+    private ServerSocket responseSocket;
 
-    public GetPeersThread(ServerSocket responseSocket, Request request){
+    public GetPeersThread(ThreadStuff callingThread, ServerSocket responseSocket, Request request){
+        this.callingThread = callingThread;
         this.responseSocket = responseSocket;
         this.request = (GetPeersRequest) request;
     }
@@ -41,5 +43,7 @@ public class GetPeersThread extends Thread{
             e.printStackTrace();
             DeepLogger.log(e.getMessage());
         }
+
+        callingThread.closeThread();
     }
 }

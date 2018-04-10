@@ -10,8 +10,10 @@ import java.net.Socket;
 
 public class TorrentListThread extends Thread{
     private ServerSocket responseSocket;
+    private ThreadStuff callingThread;
 
-    public TorrentListThread(ServerSocket responseSocket){
+    public TorrentListThread(ThreadStuff callingThread, ServerSocket responseSocket){
+        this.callingThread = callingThread;
         this.responseSocket = responseSocket;
     }
 
@@ -37,5 +39,7 @@ public class TorrentListThread extends Thread{
             DeepLogger.log(e.getMessage());
 
         }
+
+        callingThread.closeThread();
     }
 }

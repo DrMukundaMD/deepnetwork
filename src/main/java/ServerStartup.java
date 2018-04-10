@@ -1,8 +1,5 @@
 import DeepNetwork.GetPort;
-import DeepThread.DeepLogger;
-import DeepThread.MergeFilePieces;
-import DeepThread.TorrentFolder;
-import DeepThread.TorrentList;
+import DeepThread.*;
 
 import java.io.File;
 import java.util.ArrayList;

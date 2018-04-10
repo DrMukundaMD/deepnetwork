@@ -26,8 +26,8 @@ public class DeepLogger {
             e.printStackTrace();
         }
     }
-
     public static void log(String message){
         LOGGER.log(Level.FINE, message + System.lineSeparator());
+        //System.out.println(message);
     }
 }
