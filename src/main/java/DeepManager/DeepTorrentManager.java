@@ -13,16 +13,16 @@ public class DeepTorrentManager {
     private boolean[] segmentFlags;
     private boolean isDone;
     private String filename;
-    private int numSegments;
+    private int numOfSegments;
 
-    public DeepTorrentManager(int num, String filename){
-        this.numSegments = num;
+    public DeepTorrentManager(int size, String filename){
+        this.numOfSegments = size;
         this.filename = filename;
         isDone = false;
 
-        segmentFlags = new boolean[numSegments];
+        segmentFlags = new boolean[size];
 
-        for(int i = 0; i < numSegments; ++i)
+        for(int i = 0; i < size; ++i)
             segmentFlags[i] = false;
     }
 
@@ -70,7 +70,7 @@ public class DeepTorrentManager {
     public boolean check(){
         boolean done = true;
 
-        for(int i = 0; i < numSegments; ++i){
+        for(int i = 0; i < numOfSegments; ++i){
             if(!segmentFlags[i])
                 done = false;
         }
@@ -78,5 +78,13 @@ public class DeepTorrentManager {
         if(done){ isDone = true; }
 
         return isDone;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public int getSize() {
+        return numOfSegments;
     }
 }
