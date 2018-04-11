@@ -15,9 +15,12 @@ public class GetPort {
 
         for(int i = 0; i < array.length; i++)
             array[i] = i + min;
+        //todo make this randomized based on start time
+
         dead = array.length;
         used = array.length;
     }
+
     public static ServerPort getPort() {
         int index, port;
         ServerSocket serverSocket;
@@ -51,7 +54,6 @@ public class GetPort {
         swap(index, dead);
         used(index);
     }
-
 
     private static void used(int index){
         if(used == 0)

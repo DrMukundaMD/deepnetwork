@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.ServerSocket;
 
-
 class DeepServer {
     private static final int PORT = 6345;
 
