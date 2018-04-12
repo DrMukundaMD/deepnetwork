@@ -17,7 +17,7 @@ public class CreateTorrentFile {
         int i = 0;
         int buffer_size = 256 * 1024;  // 256KB standardized pieces
         byte[] buffer = new byte[buffer_size];
-        List<String> file_hashes = new ArrayList<>();
+        ArrayList<String> file_hashes = new ArrayList<>();
 
         //make segment directory and files
         File segment_folder = new File(TorrentFolder.getSegments(), file.getName());
@@ -48,7 +48,7 @@ public class CreateTorrentFile {
 
     }
 
-    private static void write(File file, List<String> output){
+    private static void write(File file, ArrayList<String> output){
         Gson gson = new Gson();
         try (FileWriter writer = new FileWriter(file)) {
             gson.toJson(output, writer);

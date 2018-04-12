@@ -8,6 +8,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.util.ArrayList;
 
 public class DeepTorrentManager {
     private boolean[] segmentFlags;
@@ -15,7 +16,7 @@ public class DeepTorrentManager {
     private String filename;
     private int numOfSegments;
 
-    public DeepTorrentManager(int size, String filename){
+    public DeepTorrentManager(String filename, ArrayList<String> torrent, int size){
         this.numOfSegments = size;
         this.filename = filename;
         isDone = false;
@@ -24,6 +25,8 @@ public class DeepTorrentManager {
 
         for(int i = 0; i < size; ++i)
             segmentFlags[i] = false;
+
+        writeT(torrent);
     }
 
     public void addSegment(int num, byte[] segment){
@@ -63,6 +66,19 @@ public class DeepTorrentManager {
         }
 
         return null;
+    }
+
+    private void writeT(ArrayList<String> torrent){
+
+        Gson gson = new Gson();
+        File file = new File(TorrentFolder.getTorrents(), filename);
+
+        try (FileWriter writer = new FileWriter(file)) {
+            gson.toJson(torrent, writer);
+        }
+        catch (Exception e){
+            DeepLogger.log(e.getMessage());
+        }
     }
 
     public boolean isDone(){return isDone;}
