@@ -30,29 +30,29 @@ class DeepClient {
         try {
             System.out.println("~DeepClient started~");
 
-            Socket client = new Socket(serverName, port);
+            Socket serverMain = new Socket(serverName, port);
 
-            ObjectOutputStream output = new ObjectOutputStream(client.getOutputStream());
+            ObjectOutputStream output = new ObjectOutputStream(serverMain.getOutputStream());
 
             GetTorrentListRequest request = new GetTorrentListRequest();
 
             output.writeObject(request);
 
-            DataInputStream i = new DataInputStream(client.getInputStream());
+            DataInputStream i = new DataInputStream(serverMain.getInputStream());
 
             int port1 = i.readInt();
 
-            client.close();
+            serverMain.close();
 
             i.close();
 
             System.out.println("Received port # "+ port1);
 
-            client = new Socket(serverName, port1);
+            serverMain = new Socket(serverName, port1);
 
 
 
-            ObjectInputStream input = new ObjectInputStream(client.getInputStream());
+            ObjectInputStream input = new ObjectInputStream(serverMain.getInputStream());
 
             Object object = input.readObject();
 
@@ -94,7 +94,7 @@ class DeepClient {
 
             input.close();
             output.close();
-            client.close();
+            serverMain.close();
         } catch (Exception e) {
             e.printStackTrace();
             DeepLogger.log(e.getMessage());

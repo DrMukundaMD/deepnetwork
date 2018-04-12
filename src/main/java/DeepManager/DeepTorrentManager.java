@@ -4,10 +4,7 @@ import DeepThread.DeepLogger;
 import DeepThread.TorrentFolder;
 import com.google.gson.Gson;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
+import java.io.*;
 import java.util.ArrayList;
 
 public class DeepTorrentManager {
@@ -16,17 +13,17 @@ public class DeepTorrentManager {
     private String filename;
     private int numOfSegments;
 
-    public DeepTorrentManager(String filename, ArrayList<String> torrent, int size){
-        this.numOfSegments = size;
+    public DeepTorrentManager(String filename, ArrayList<String> hashes){
+        this.numOfSegments = hashes.size();
         this.filename = filename;
         isDone = false;
 
-        segmentFlags = new boolean[size];
+        segmentFlags = new boolean[numOfSegments];
 
-        for(int i = 0; i < size; ++i)
+        for(int i = 0; i < numOfSegments; ++i)
             segmentFlags[i] = false;
 
-        writeT(torrent);
+        writeT(hashes);
     }
 
     public void addSegment(int num, byte[] segment){
@@ -68,17 +65,11 @@ public class DeepTorrentManager {
         return null;
     }
 
-    private void writeT(ArrayList<String> torrent){
-
-        Gson gson = new Gson();
-        File file = new File(TorrentFolder.getTorrents(), filename);
-
-        try (FileWriter writer = new FileWriter(file)) {
-            gson.toJson(torrent, writer);
-        }
-        catch (Exception e){
-            DeepLogger.log(e.getMessage());
-        }
+    public synchronized int getSegments(){
+        for(int i = 0; i < numOfSegments; ++i)
+            if(!segmentFlags[i])
+                return i;
+        return -1;
     }
 
     public boolean isDone(){return isDone;}
@@ -103,4 +94,18 @@ public class DeepTorrentManager {
     public int getSize() {
         return numOfSegments;
     }
+
+    private void writeT(ArrayList<String> torrent){
+
+        Gson gson = new Gson();
+        File file = new File(TorrentFolder.getTorrents(), filename);
+
+        try (FileWriter writer = new FileWriter(file)) {
+            gson.toJson(torrent, writer);
+        }
+        catch (Exception e){
+            DeepLogger.log(e.getMessage());
+        }
+    }
+
 }
