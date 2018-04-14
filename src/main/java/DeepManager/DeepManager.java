@@ -1,6 +1,7 @@
 package DeepManager;
 
 import DeepThread.DeepLogger;
+import DeepThread.TorrentFolder;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -13,6 +14,7 @@ import java.util.Queue;
 public class DeepManager extends Thread implements ThreadStuff{
     private static DeepManager DM;
     private HashMap<String, DeepTorrentManager> torrents;
+    //todo make concurrent?
     private Queue<String> doneQueue;
     private String server;
     private int port;
@@ -25,7 +27,7 @@ public class DeepManager extends Thread implements ThreadStuff{
     }
 
     public static synchronized DeepManager getInstance() {
-        File file = new File(""); //todo
+        File file = new File(TorrentFolder.getSegments(), ".dm");
 
         if (DM == null)
             if(file.exists()){
@@ -39,6 +41,7 @@ public class DeepManager extends Thread implements ThreadStuff{
                 }
             } else
                 DM = new DeepManager(false);
+
         return DM;
     }
 
@@ -47,9 +50,6 @@ public class DeepManager extends Thread implements ThreadStuff{
         while(true){ //user is not ended
 
             // user.request1 (get new torrent list)
-
-
-
 
             // user.request2 (get torrent)
 

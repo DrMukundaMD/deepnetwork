@@ -1,40 +1,34 @@
 package DeepNetwork;
 
+import DeepThread.DeepLogger;
+
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class DeepHash {
 
-    public static String getHash(byte[] toHash) throws Exception {
+    public static String getHash(byte[] toHash) {
 
-        StringBuffer output = new StringBuffer();
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        digest.update(toHash);
+        byte[] hash_data;
+        StringBuilder output = new StringBuilder();
 
-        byte[] hash_data = digest.digest();
-
-        //write number to buffer in hex
-        for (int i = 0; i < hash_data.length; i++) {
-            output.append(Integer.toString((hash_data[i] & 0xff) + 0x100, 16).substring(1));
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            digest.update(toHash);
+            hash_data = digest.digest();
+            //write number to buffer in hex
+            for (byte b: hash_data) {
+                output.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
+            }
+        } catch (NoSuchAlgorithmException e){
+            DeepLogger.log(e.getMessage());
         }
 
         return output.toString();
-
     }
 
-    public static boolean compareHash(byte[] to_hash, String hash) throws Exception {
-
-        StringBuffer output = new StringBuffer();
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        digest.update(to_hash);
-
-        byte hash_data[] = digest.digest();
-
-        //write number to buffer in hex
-        for (int i = 0; i < hash_data.length; i++) {
-            output.append(Integer.toString((hash_data[i] & 0xff) + 0x100, 16).substring(1));
-        }
-
-        return output.toString().equals(hash);
+    public static boolean compareHash(byte[] toHash, String hash){
+        return hash.equals(getHash(toHash));
     }
 
 }

@@ -15,17 +15,10 @@ public class TorrentFolder {
         segments = new File(".segments");
         done = new File("done");
 
-        if(checkTorrentFolder(toTorrent))
-            toTorrent = createTorrentFolder(toTorrent);
-
-        if(checkTorrentFolder(torrents))
-            torrents = createTorrentFolder(torrents);
-
-        if(checkTorrentFolder(segments))
-            segments = createTorrentFolder(segments);
-
-        if(checkTorrentFolder(done))
-            done = createTorrentFolder(done);
+        getToTorrent();
+        getTorrents();
+        getSegments();
+        getDone();
     }
 
     private static boolean checkTorrentFolder(File folder) {
@@ -39,18 +32,28 @@ public class TorrentFolder {
     }
 
     public static File getToTorrent() {
+        if(checkTorrentFolder(toTorrent))
+            toTorrent = createTorrentFolder(toTorrent);
         return toTorrent;
     }
 
     public static File getTorrents() {
+        if(checkTorrentFolder(torrents))
+            torrents = createTorrentFolder(torrents);
         return torrents;
     }
 
     public static File getSegments() {
+        if(checkTorrentFolder(segments))
+            segments = createTorrentFolder(segments);
         return segments;
     }
 
-    public static File getDone() { return done; }
+    public static File getDone() {
+        if(checkTorrentFolder(done))
+            done = createTorrentFolder(done);
+        return done;
+    }
 
     public static boolean isTorrent(String filename) {
         File file = new File(torrents, filename + ".txt");

@@ -2,42 +2,43 @@ package DeepManager;
 
 import DeepNetwork.*;
 import DeepThread.DeepLogger;
+import DeepThread.MergeFilePieces;
 import DeepThread.TorrentFolder;
 import com.google.gson.Gson;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
 public class DeepTorrentManager extends Thread{
+    private ArrayList<String> hashes;
     private boolean[] segmentFlags;
-    private boolean isDone;
-    private String filename;
+    private DeepPeerManager peers;
     private int numOfSegments;
-    private ArrayList<String> peers;
-    private boolean needPeers;
+    private String filename;
     private String server;
+    private boolean done;
     private int port;
 
     DeepTorrentManager(String filename, ArrayList<String> hashes, String server, int port){
-        this.numOfSegments = hashes.size();
-        this.filename = filename;
-        this.server = server;
+        done = false;
         this.port = port;
-        isDone = false;
-        needPeers = true;
+        this.server = server;
+        this.filename = filename;
+        this.hashes = hashes;
+        peers = new DeepPeerManager();
+        numOfSegments = hashes.size();
         segmentFlags = new boolean[numOfSegments];
 
         for(int i = 0; i < numOfSegments; ++i)
             segmentFlags[i] = false;
 
-        writeT(hashes);
+        //writeT(hashes);
     }
 
     @Override
     public void run(){
-        while(!isDone){
+        while(!done){
             boolean done = false;
 
             String peer = getPeer();
@@ -47,36 +48,31 @@ public class DeepTorrentManager extends Thread{
                 done = true;
             }
 
-            int segment = getSegments();
-
-            if (segment == -1){
-                //todo throw some exception
-                done = true;
-            }
-
             if(!done){
+                int segment = getNextSegment();
                 requestSegment(peer, segment);
             }
 
             check();
         }
 
-        //todo compile file
+        MergeFilePieces.merge(filename);
     }
 
     // -- Segments --
 
     private void addSegment(int num, byte[] segment){
-        Gson gson = new Gson();
-        File segmentFile = new File(TorrentFolder.getSegments(), filename);
-        File file = new File(segmentFile, Integer.toString(num));
-        //todo add hash check here
-        try (FileWriter writer = new FileWriter(file)) {
-            gson.toJson(segment, writer);
-        }
-        catch (Exception e){
-            e.printStackTrace();
-            DeepLogger.log(e.getMessage());
+        if(DeepHash.compareHash(segment, hashes.get(num))) {
+            Gson gson = new Gson();
+            File segmentFile = new File(TorrentFolder.getSegments(), filename);
+            File file = new File(segmentFile, Integer.toString(num));
+
+            try (FileWriter writer = new FileWriter(file)) {
+                gson.toJson(segment, writer);
+            } catch (Exception e) {
+                DeepLogger.log(e.getMessage());
+            }
+            segmentFlags[num] = true;
         }
     }
 
@@ -105,7 +101,7 @@ public class DeepTorrentManager extends Thread{
         return null;
     }
 
-    private int getSegments(){
+    private int getNextSegment(){
         //todo
         for(int i = 0; i < numOfSegments; ++i)
             if(!segmentFlags[i])
@@ -165,18 +161,14 @@ public class DeepTorrentManager extends Thread{
 
     // -- Peers --
 
-    private void addPeers(ArrayList<String> peers){
-        this.peers = peers;
-        needPeers = false;
+    private void setPeers(ArrayList<String> peers){
+        this.peers.setPeers(peers);
     }
 
     private String getPeer(){
-        return peers.remove(0);
+        return peers.getPeer();
     }
 
-    public boolean needsPeers(){
-        return needPeers;
-    }
 
     private void requestPeers(){
         // create request
@@ -189,7 +181,7 @@ public class DeepTorrentManager extends Thread{
             Object response = stream.readObject();
 
             if(response instanceof GetPeersResponse){
-                addPeers(((GetPeersResponse) response).getPeers());
+                setPeers(((GetPeersResponse) response).getPeers());
             }
 
             if(response instanceof UnknownRequestResponse){
@@ -245,7 +237,7 @@ public class DeepTorrentManager extends Thread{
                 done = false;
         }
 
-        if(done){ isDone = true; }
+        if(done){ this.done = true; }
     }
 
     public String getFilename() {
