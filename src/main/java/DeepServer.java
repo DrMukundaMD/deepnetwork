@@ -5,6 +5,8 @@
 	COMP 512
 -------------------------------*/
 
+import DeepManager.DeepThreadManager;
+import DeepManager.ServerStartup;
 import DeepThread.*;
 
 import java.io.DataOutputStream;

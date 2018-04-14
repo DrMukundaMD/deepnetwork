@@ -1,3 +1,5 @@
+package DeepManager;
+
 import DeepNetwork.DeepHash;
 import DeepThread.DeepLogger;
 import DeepThread.TorrentFolder;

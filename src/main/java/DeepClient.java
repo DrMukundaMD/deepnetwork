@@ -5,17 +5,16 @@
 	COMP 512
 -------------------------------*/
 
+import DeepManager.ClientStartup;
 import DeepNetwork.GetTorrentFileRequest;
 import DeepNetwork.GetTorrentListRequest;
 import DeepNetwork.GetTorrentListResponse;
 import DeepNetwork.Request;
 import DeepThread.DeepLogger;
-import DeepThread.TorrentListThread;
 
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 class DeepClient {
 
