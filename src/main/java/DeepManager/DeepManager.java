@@ -1,7 +1,6 @@
 package DeepManager;
 
 import DeepThread.DeepLogger;
-import DeepThread.RequestPeersThread;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -14,15 +13,13 @@ import java.util.Queue;
 public class DeepManager extends Thread implements ThreadStuff{
     private static DeepManager DM;
     private HashMap<String, DeepTorrentManager> torrents;
-    private HashMap<String, ArrayList<String>> peers;
-    private Queue<String> requestQueue;
+    private Queue<String> doneQueue;
     private String server;
     private int port;
 
     private DeepManager(boolean isServerFlag) {
         torrents = new HashMap<>();
-        peers = new HashMap<>();
-        requestQueue = new ArrayDeque<>();
+        doneQueue = new ArrayDeque<>();
         server = "ada";
         port = 6345;
     }
@@ -47,35 +44,20 @@ public class DeepManager extends Thread implements ThreadStuff{
 
     @Override
     public void run(){
-        while(true){
+        while(true){ //user is not ended
 
-            // get torrents list --
+            // user.request1 (get new torrent list)
 
 
-            //get rid of?
-            while(!requestQueue.isEmpty()){
-                String file = requestQueue.poll();
-                boolean done = false;
 
-                // If torrent doesn't exist, start it
-                if(!torrents.containsKey(file))
-                    startTorrent(file, new ArrayList<>()); //todo*
 
-                DeepTorrentManager dtm = torrents.get(file);
+            // user.request2 (get torrent)
 
-                if(dtm.isDone()){
-                    done = true;
-                }
-
-                // if we need a new peer list
-                if(dtm.needsPeers() && !done){
-                    Thread thread = new RequestPeersThread(DM, dtm, server, port);
-                    done = true;
-                }
-
-                if(!done){
-                    //Thread thread = new RequestSegmentThread();
-                    done = true;
+            // check done queue
+            if(!doneQueue.isEmpty()){
+                //tell ui
+                while(!doneQueue.isEmpty()){
+                    String s = doneQueue.poll();
                 }
 
             }
@@ -85,14 +67,18 @@ public class DeepManager extends Thread implements ThreadStuff{
     }
 
     @Override
-    public synchronized void closeThread(){
+    public synchronized void closeThread(boolean flag, String file){
         //todo
         //if file still needs requesting
+        if(flag){
+            doneQueue.add(file);
+        }
+
     }
 
     private void startTorrent(String filename, ArrayList<String> hashes) {
         if (!torrents.containsKey(filename))
-            torrents.put(filename, new DeepTorrentManager(filename, hashes));
+            torrents.put(filename, new DeepTorrentManager(filename, hashes, server, port));
         else
             DeepLogger.log("DeepManager: startTorrent: Torrent Manager " + filename + " already created.");
     }

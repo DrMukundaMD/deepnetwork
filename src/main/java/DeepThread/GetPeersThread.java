@@ -45,6 +45,6 @@ public class GetPeersThread extends Thread{
             DeepLogger.log(e.getMessage());
         }
 
-        callingThread.closeThread();
+        //callingThread.closeThread();
     }
 }

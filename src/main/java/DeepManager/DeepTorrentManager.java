@@ -1,23 +1,30 @@
 package DeepManager;
 
+import DeepNetwork.*;
 import DeepThread.DeepLogger;
 import DeepThread.TorrentFolder;
 import com.google.gson.Gson;
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import java.io.*;
+import java.net.Socket;
 import java.util.ArrayList;
 
-public class DeepTorrentManager {
+public class DeepTorrentManager extends Thread{
     private boolean[] segmentFlags;
     private boolean isDone;
     private String filename;
     private int numOfSegments;
-    private ArrayList peers;
+    private ArrayList<String> peers;
     private boolean needPeers;
+    private String server;
+    private int port;
 
-    public DeepTorrentManager(String filename, ArrayList<String> hashes){
+    DeepTorrentManager(String filename, ArrayList<String> hashes, String server, int port){
         this.numOfSegments = hashes.size();
         this.filename = filename;
+        this.server = server;
+        this.port = port;
         isDone = false;
         needPeers = true;
         segmentFlags = new boolean[numOfSegments];
@@ -28,9 +35,38 @@ public class DeepTorrentManager {
         writeT(hashes);
     }
 
+    @Override
+    public void run(){
+        while(!isDone){
+            boolean done = false;
+
+            String peer = getPeer();
+
+            if (peer == null){
+                requestPeers();
+                done = true;
+            }
+
+            int segment = getSegments();
+
+            if (segment == -1){
+                //todo throw some exception
+                done = true;
+            }
+
+            if(!done){
+                requestSegment(peer, segment);
+            }
+
+            check();
+        }
+
+        //todo compile file
+    }
+
     // -- Segments --
 
-    public void addSegment(int num, byte[] segment){
+    private void addSegment(int num, byte[] segment){
         Gson gson = new Gson();
         File segmentFile = new File(TorrentFolder.getSegments(), filename);
         File file = new File(segmentFile, Integer.toString(num));
@@ -69,29 +105,139 @@ public class DeepTorrentManager {
         return null;
     }
 
-    public synchronized int getSegments(){
+    private int getSegments(){
+        //todo
         for(int i = 0; i < numOfSegments; ++i)
             if(!segmentFlags[i])
                 return i;
         return -1;
     }
 
+    private void requestSegment(String host, int segment){
+        try{
+            // create stuff
+            Socket serverMain = new Socket(host, port);
+            ObjectOutputStream output = new ObjectOutputStream(serverMain.getOutputStream());
+            GetFilePieceRequest request = new GetFilePieceRequest(filename, segment);
+
+            // write request
+            output.writeObject(request);
+
+            // get new port
+            DataInputStream input = new DataInputStream(serverMain.getInputStream());
+            int newPort = input.readInt();
+
+            // close socket
+            input.close();
+            output.close();
+            serverMain.close();
+
+            // open connection on new port
+            serverMain = new Socket(host, newPort);
+
+            // get response
+            ObjectInputStream stream = new ObjectInputStream(serverMain.getInputStream());
+
+            try {
+                Object response = stream.readObject();
+
+                if(response instanceof GetFilePieceResponse){
+                    GetFilePieceResponse r = (GetFilePieceResponse) response;
+                    addSegment(r.getPiece(), r.getSegment());
+                }
+
+                if(response instanceof UnknownRequestResponse){
+                    DeepLogger.log("Error: UnknownRequestResponse in requestSegment for torrent: " + filename);
+                }
+            }catch (ClassNotFoundException e){
+                DeepLogger.log(e.getMessage());
+            }
+
+            //Close
+            stream.close();
+            serverMain.close();
+
+        } catch (IOException e){
+            e.printStackTrace();
+            DeepLogger.log(e.getMessage());
+        }
+    }
+
     // -- Peers --
 
-    public void addPeers(ArrayList<String> peers){
+    private void addPeers(ArrayList<String> peers){
         this.peers = peers;
         needPeers = false;
+    }
+
+    private String getPeer(){
+        return peers.remove(0);
     }
 
     public boolean needsPeers(){
         return needPeers;
     }
 
+    private void requestPeers(){
+        // create request
+        GetPeersRequest request = new GetPeersRequest(filename);
+
+        // port cycle
+        ObjectInputStream stream = portCycle(server, port, request);
+
+        try {
+            Object response = stream.readObject();
+
+            if(response instanceof GetPeersResponse){
+                addPeers(((GetPeersResponse) response).getPeers());
+            }
+
+            if(response instanceof UnknownRequestResponse){
+                //do stuff
+                int x = 0;
+            }
+        stream.close();
+        }catch (ClassNotFoundException | IOException e){
+            DeepLogger.log(e.getMessage());
+        }
+
+        //Close
+    }
+
     // -- Control --
 
-    public boolean isDone(){return isDone;}
+    private ObjectInputStream portCycle(String host, int port, Request request){
+        try{
+            // create stuff
+            Socket serverMain = new Socket(host, port);
+            ObjectOutputStream output = new ObjectOutputStream(serverMain.getOutputStream());
 
-    public boolean check(){
+            // write request
+            output.writeObject(request);
+
+            // get new port
+            DataInputStream input = new DataInputStream(serverMain.getInputStream());
+            int newPort = input.readInt();
+
+            // close socket
+            input.close();
+            output.close();
+            serverMain.close();
+
+            // open connection on new port
+            serverMain = new Socket(host, newPort);
+
+            return new ObjectInputStream(serverMain.getInputStream());
+
+        } catch (IOException e){
+            e.printStackTrace();
+            DeepLogger.log(e.getMessage());
+        }
+
+        return null;
+    }
+
+    private void check(){
         boolean done = true;
 
         for(int i = 0; i < numOfSegments; ++i){
@@ -100,18 +246,12 @@ public class DeepTorrentManager {
         }
 
         if(done){ isDone = true; }
-
-        return isDone;
     }
-
 
     public String getFilename() {
         return filename;
     }
 
-    public int getSize() {
-        return numOfSegments;
-    }
 
     private void writeT(ArrayList<String> torrent){
 
