@@ -1,36 +1,61 @@
 package DeepManager;
 
 import DeepThread.DeepLogger;
+import com.google.gson.Gson;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Queue;
 
-public class DeepManager {
-    private static HashMap<String, DeepTorrentManager> torrents;
-    private static HashMap<String, ArrayList<String>> peers;
+public class DeepManager extends Thread {
+    private static DeepManager DM;
+    private HashMap<String, DeepTorrentManager> torrents;
+    private HashMap<String, ArrayList<String>> peers;
+    private Queue<String> requestQueue;
 
-    public DeepManager(boolean isServerFlag){
+    private DeepManager(boolean isServerFlag) {
         torrents = new HashMap<>();
         peers = new HashMap<>();
     }
 
-    public void startTorrent(String filename, ArrayList<String> hashes){
-        if(!torrents.containsKey(filename))
+    public static synchronized DeepManager getInstance() {
+        File file = new File(""); //todo
+
+        if (DM == null)
+            if(file.exists()){
+                Gson gson = new Gson();
+                try (FileReader reader = new FileReader(file)) {
+                    DM = gson.fromJson(reader,DeepManager.class);
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                    DeepLogger.log(e.getMessage());
+                }
+            } else
+                DM = new DeepManager(false);
+        return DM;
+    }
+
+    @Override
+    public void run(){
+        while(true){
+            while(!requestQueue.isEmpty()){
+                String file = requestQueue.poll();
+
+
+            }
+        }
+    }
+
+    private void startTorrent(String filename, ArrayList<String> hashes) {
+        if (!torrents.containsKey(filename))
             torrents.put(filename, new DeepTorrentManager(filename, hashes));
         else
-            DeepLogger.log("DeepManager: startTorrent: Torrent Manager "+filename+" already created.");
+            DeepLogger.log("DeepManager: startTorrent: Torrent Manager " + filename + " already created.");
     }
 
-    public int getNeededSegment(String filename){
-        if(!torrents.containsKey(filename)){
-            DeepLogger.log("DeepManager: getNeededSegments: Torrent Manager "+ filename +" not created.");
-        }
-        return torrents.get(filename).getSegments();
-    }
 
-    public void getPeers(String filename){
-        if(!peers.containsKey(filename) || peers.get(filename) == null ){
-            DeepLogger.log("DeepManager: getPeers: No peers for "+ filename );
-        }
-    }
 }

@@ -1,5 +1,6 @@
 package DeepThread;
 
+import DeepManager.ThreadStuff;
 import DeepNetwork.GetTorrentFileRequest;
 import DeepNetwork.GetTorrentFileResponse;
 import DeepNetwork.Request;

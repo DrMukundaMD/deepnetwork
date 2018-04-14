@@ -1,5 +1,6 @@
 package DeepThread;
 
+import DeepManager.ThreadStuff;
 import DeepNetwork.UnknownRequestResponse;
 import DeepThread.DeepLogger;
 

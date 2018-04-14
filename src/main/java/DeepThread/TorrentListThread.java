@@ -2,6 +2,7 @@ package DeepThread;
 
 import DeepNetwork.GetTorrentListResponse;
 import DeepThread.DeepLogger;
+import DeepManager.ThreadStuff;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
