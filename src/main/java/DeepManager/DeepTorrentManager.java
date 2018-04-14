@@ -12,12 +12,14 @@ public class DeepTorrentManager {
     private boolean isDone;
     private String filename;
     private int numOfSegments;
+    private ArrayList peers;
+    private boolean needPeers;
 
     public DeepTorrentManager(String filename, ArrayList<String> hashes){
         this.numOfSegments = hashes.size();
         this.filename = filename;
         isDone = false;
-
+        needPeers = true;
         segmentFlags = new boolean[numOfSegments];
 
         for(int i = 0; i < numOfSegments; ++i)
@@ -25,6 +27,8 @@ public class DeepTorrentManager {
 
         writeT(hashes);
     }
+
+    // -- Segments --
 
     public void addSegment(int num, byte[] segment){
         Gson gson = new Gson();
@@ -72,6 +76,19 @@ public class DeepTorrentManager {
         return -1;
     }
 
+    // -- Peers --
+
+    public void addPeers(ArrayList<String> peers){
+        this.peers = peers;
+        needPeers = false;
+    }
+
+    public boolean needsPeers(){
+        return needPeers;
+    }
+
+    // -- Control --
+
     public boolean isDone(){return isDone;}
 
     public boolean check(){
@@ -86,6 +103,7 @@ public class DeepTorrentManager {
 
         return isDone;
     }
+
 
     public String getFilename() {
         return filename;

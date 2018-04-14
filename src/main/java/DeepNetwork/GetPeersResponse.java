@@ -16,7 +16,7 @@ public class GetPeersResponse extends Response {
     public ArrayList<String> getPeers() { return peers; }
 
     public void setFilename(String filename){ this.filename = filename; }
-    public void setPeers(ArrayList<String> peers) { this.peers = peers; }
+    //public void setPeers(ArrayList<String> peers) { this.peers = peers; }
 
     @Override
     public String type(){ return TYPE; }
