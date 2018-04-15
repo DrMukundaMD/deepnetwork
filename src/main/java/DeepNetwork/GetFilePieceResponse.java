@@ -1,6 +1,6 @@
 package DeepNetwork;
 
-public class GetFilePieceResponse extends Request{
+public class GetFilePieceResponse extends Response{
     private static final String TYPE = "GetFilePieceResponse";
     private String filename;
     private int piece;

@@ -22,6 +22,8 @@ class DeepClient {
     private static BlockingQueue<Request> fromUI;
     private static BlockingQueue<Response> toUI;
     private static ArrayList<String> torrents;
+    private static ArrayList<String> active;
+    private static ArrayList<String> done;
 
     public static void main(String[] args) {
         //String serverName = args[0];
@@ -51,6 +53,7 @@ class DeepClient {
                 "\t\t2 - Request new Torrent List\n" +
                 "\t\t3 - Active Torrents\n" +
                 "\t\t0 - Exit\n";
+        //todo
 
         while(user !=0){
             clear();
@@ -62,7 +65,7 @@ class DeepClient {
                     torrentList();
                     break;
                 case 2:
-                    check();
+                    getList();
                     break;
                 case 3:
                     System.out.println("You Shall Not Pass!");
@@ -77,15 +80,15 @@ class DeepClient {
     }
 
     private static void torrentList(){
-        int user = 1;
+        update();
+
         StringBuilder display = new StringBuilder("\t\t~Torrent List~\n" +
                 "\t\t~~~~~~~~~~~\n");
-
         for(int i = 0; i < torrents.size(); ++i)
             display.append("\t\t").append(i+1).append(" - ").append(torrents.get(i)).append("\n");
-
         display.append("\t\t0 - Exit\n");
 
+        int user = 1;
         while(user != 0) {
             clear();
             System.out.println(display);
@@ -93,7 +96,7 @@ class DeepClient {
             user = reader.nextInt();
             if(user > 0 && user <= torrents.size()){
                 String file = torrents.get(user-1);
-                System.out.println("~ " + file+ " requested");
+                System.out.println("\t\t~ " + user + " - " + file+ " requested ~");
                 fromUI.add(new GetTorrentFileRequest(file));
 
             }else if (user != 0){
@@ -102,21 +105,22 @@ class DeepClient {
         }
     }
 
-    private static boolean check(){
-
+    private static void getList(){
         fromUI.add(new GetTorrentListRequest());
+    }
 
-        boolean x = false;
+    private static void update(){
         Response r = toUI.poll();
 
         if(r != null){
             if(r instanceof GetTorrentListResponse){
-               torrents = ((GetTorrentListResponse) r).getFiles();
-               x = true;
-               System.out.println("Test????");
+                torrents = ((GetTorrentListResponse) r).getFiles();
+            }
+
+            if(r instanceof GetFilePieceResponse){
+                done.add(((GetFilePieceResponse) r).getFile());
             }
         }
-        return x;
     }
 
     private static void exit(){
