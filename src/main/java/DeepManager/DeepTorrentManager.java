@@ -9,8 +9,11 @@ import com.google.gson.Gson;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
 
 public class DeepTorrentManager extends Thread{
+    private BlockingQueue<Request> fromDM;
+    private DeepManager DM;
     private ArrayList<String> hashes;
     private boolean[] segmentFlags;
     private DeepPeerManager peers;
@@ -18,45 +21,60 @@ public class DeepTorrentManager extends Thread{
     private String filename;
     private String server;
     private boolean done;
+    private boolean on;
     private int port;
 
-    DeepTorrentManager(String filename, ArrayList<String> hashes, String server, int port){
+    DeepTorrentManager(String filename, String server, int port, BlockingQueue<Request> fromDM, DeepManager DM){
+        on = true;
         done = false;
+        this.DM = DM;
         this.port = port;
+        this.fromDM = fromDM;
         this.server = server;
         this.filename = filename;
-        this.hashes = hashes;
         peers = new DeepPeerManager();
-        numOfSegments = hashes.size();
-        segmentFlags = new boolean[numOfSegments];
 
-        for(int i = 0; i < numOfSegments; ++i)
-            segmentFlags[i] = false;
+//        numOfSegments = hashes.size();
+//        segmentFlags = new boolean[numOfSegments];
+//
+//        for(int i = 0; i < numOfSegments; ++i)
+//            segmentFlags[i] = false;
 
         //writeT(hashes);
     }
 
     @Override
     public void run(){
-        while(!done){
+        System.out.println("~DTM " + filename + " Started~");
+        hashes = new ArrayList<>();
+        //todo get hashes
+
+        while(!done && on){
             boolean done = false;
 
-            String peer = getPeer();
-
-            if (peer == null){
-                requestPeers();
-                done = true;
+//            String peer = getPeer();
+//
+//            if (peer == null){
+//                requestPeers();
+//                done = true;
+//            }
+//
+//            if(!done){
+//                int segment = getNextSegment();
+//                requestSegment(peer, segment);
+//            }
+            try {
+                sleep(1000);
+            } catch (InterruptedException e){
+                DeepLogger.log(e.getMessage());
             }
-
-            if(!done){
-                int segment = getNextSegment();
-                requestSegment(peer, segment);
-            }
-
-            check();
+            update();
         }
 
-        MergeFilePieces.merge(filename);
+        if(done)
+            DM.closeThread(true, filename);
+            //MergeFilePieces.merge(filename);
+        System.out.println("~DTM " + filename + " Closed~");
     }
 
     // -- Segments --
@@ -229,7 +247,20 @@ public class DeepTorrentManager extends Thread{
         return null;
     }
 
-    private void check(){
+    private void update(){
+
+        boolean close = false;
+
+        if(fromDM.size() > 0) {
+            Request r = fromDM.poll();
+
+            //set priority
+
+            if (r instanceof ShutDownRequest) {
+                close = true;
+            }
+        }
+
         boolean done = true;
 
         for(int i = 0; i < numOfSegments; ++i){
@@ -238,6 +269,7 @@ public class DeepTorrentManager extends Thread{
         }
 
         if(done){ this.done = true; }
+        if(close){this.on = false;}
     }
 
     public String getFilename() {

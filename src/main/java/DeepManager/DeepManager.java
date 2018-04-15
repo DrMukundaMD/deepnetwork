@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class DeepManager extends Thread implements ThreadStuff{
@@ -17,6 +18,8 @@ public class DeepManager extends Thread implements ThreadStuff{
     private HashMap<String, DeepTorrentManager> torrents;
     private BlockingQueue<Request> fromUI;
     private BlockingQueue<Response> toUI;
+    private BlockingQueue<Request> fromDM;
+    private BlockingQueue<Response> toDM;
     private BlockingQueue<String> doneQueue;
     private String server;
     private int port;
@@ -24,6 +27,7 @@ public class DeepManager extends Thread implements ThreadStuff{
     public DeepManager(boolean isServerFlag, BlockingQueue<Request> fromUI, BlockingQueue<Response> toUI) {
         torrents = new HashMap<>();
         doneQueue = new LinkedBlockingQueue<>();
+        fromDM = new LinkedBlockingQueue<>();
         this.fromUI = fromUI;
         this.toUI = toUI;
         server = "ada";
@@ -70,20 +74,24 @@ public class DeepManager extends Thread implements ThreadStuff{
 
                     // user.request2 (get torrent)
 
+                    if(r instanceof GetTorrentFileRequest){
+                        startTorrent(((GetTorrentFileRequest) r).getFilename());
+                    }
+
                     // user shutdown
                     if (r instanceof ShutDownRequest) {
                         on = false;
+                        fromDM.add(new ShutDownRequest());
                         System.out.println("~DeepManager Closed~");
                     }
                 }
 
                 // check done queue
-                if (!doneQueue.isEmpty()) {
-                    //tell ui
-                    while (!doneQueue.isEmpty()) {
-                        String s = doneQueue.poll();
-                    }
+                while (!doneQueue.isEmpty()) {
+                    String s = doneQueue.poll();
+                    toUI.offer(new GetFilePieceResponse(s, 0, null));
                 }
+
 
                 try {
                     sleep(5);
@@ -104,9 +112,12 @@ public class DeepManager extends Thread implements ThreadStuff{
 
     }
 
-    private void startTorrent(String filename, ArrayList<String> hashes) {
-        if (!torrents.containsKey(filename))
-            torrents.put(filename, new DeepTorrentManager(filename, hashes, server, port));
+    private void startTorrent(String filename) {
+        if (!torrents.containsKey(filename)) {
+            DeepTorrentManager dtm = new DeepTorrentManager(filename, server, port, fromDM, this);
+            torrents.put(filename, dtm);
+            dtm.start();
+        }
         else
             DeepLogger.log("DeepManager: startTorrent: Torrent Manager " + filename + " already created.");
     }

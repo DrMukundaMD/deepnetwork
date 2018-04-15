@@ -31,6 +31,7 @@ class DeepClient {
 
         ClientStartup.main(null);
         torrents = new ArrayList<>();
+        done = new ArrayList<>();
         CLS.main();
 
         fromUI = new LinkedBlockingDeque<>();
@@ -51,7 +52,7 @@ class DeepClient {
                 "\t\t~~~~~~~~~~~\n" +
                 "\t\t1 - Show Torrent List\n" +
                 "\t\t2 - Request new Torrent List\n" +
-                "\t\t3 - Active Torrents\n" +
+                "\t\t3 - Done Torrents\n" +
                 "\t\t0 - Exit\n";
         //todo
 
@@ -68,7 +69,7 @@ class DeepClient {
                     getList();
                     break;
                 case 3:
-                    System.out.println("You Shall Not Pass!");
+                    doneTorrents();
                     break;
                 case 0:
                     exit();
@@ -89,7 +90,7 @@ class DeepClient {
         display.append("\t\t0 - Exit\n");
 
         int user = 1;
-        while(user != 0) {
+        while(user != 0) {//todo clean this up
             clear();
             System.out.println(display);
             Scanner reader = new Scanner(System.in);
@@ -103,6 +104,21 @@ class DeepClient {
                 System.out.println("Invalid input");
             }
         }
+    }
+
+    private static void doneTorrents(){
+        update();
+
+        StringBuilder display = new StringBuilder("\t\t~Completed Torrent List~\n" +
+                "\t\t~~~~~~~~~~~\n");
+        for(int i = 0; i < done.size(); ++i)
+            display.append("\t\t").append(i+1).append(" - ").append(done.get(i)).append("\n");
+        display.append("\t\t0 - Exit\n");
+
+        System.out.println(display);
+        int user;
+        Scanner reader = new Scanner(System.in);
+        user = reader.nextInt();
     }
 
     private static void getList(){
