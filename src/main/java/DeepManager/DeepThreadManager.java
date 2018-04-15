@@ -46,7 +46,7 @@ public class DeepThreadManager implements ThreadStuff{
         numberOfThreads++;
     }
 
-    public synchronized void closeThread(){
+    public synchronized void closeThread(boolean flag, String filename){
         // Add some static object management here?
         numberOfThreads--;
     }

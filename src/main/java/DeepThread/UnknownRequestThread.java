@@ -41,6 +41,6 @@ public class UnknownRequestThread extends Thread{
 
         }
 
-        callingThread.closeThread();
+        callingThread.closeThread(true, "");
     }
 }

@@ -7,13 +7,9 @@
 
 import DeepManager.ClientStartup;
 import DeepManager.DeepManager;
-import DeepNetwork.GetTorrentFileRequest;
-import DeepNetwork.GetTorrentListRequest;
-import DeepNetwork.GetTorrentListResponse;
-import DeepNetwork.Request;
+import DeepNetwork.*;
 import DeepThread.DeepLogger;
 
-import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -23,58 +19,125 @@ import java.util.concurrent.LinkedBlockingDeque;
 class DeepClient {
 
     private static final int port = 6345;
-    public static BlockingQueue<String> UIQueue;
+    private static BlockingQueue<Request> fromUI;
+    private static BlockingQueue<Response> toUI;
+    private static ArrayList<String> torrents;
 
     public static void main(String[] args) {
         //String serverName = args[0];
-        String serverName = "ada";
+        //String serverName = "ada";
 
-        UIQueue = new LinkedBlockingDeque<>();
-
-        DeepManager DM = new DeepManager(true,UIQueue);
         ClientStartup.main(null);
+        torrents = new ArrayList<>();
+        CLS.main();
+
+        fromUI = new LinkedBlockingDeque<>();
+        toUI = new LinkedBlockingDeque<>();
+        DeepManager DM = DeepManager.getInstance(true,fromUI,toUI);
+
+        DM.start();
+
         System.out.println("~DeepClient started~");
-        int user = 1;
-        while(user !=0){
-            user = menu();
 
-            if(user == 1)
-                user = torrentList();
-
-        }
+        menu();
 
     }
 
-    private static int menu(){
-        StringBuilder display = new StringBuilder();
+    private static void menu(){
+        int user = 1;
+        String display = "\t\t~Main Menu~\n" +
+                "\t\t~~~~~~~~~~~\n" +
+                "\t\t1 - Show Torrent List\n" +
+                "\t\t2 - Request new Torrent List\n" +
+                "\t\t3 - Active Torrents\n" +
+                "\t\t0 - Exit\n";
 
-        display.append("\t\t~Main Menu~\n");
-        display.append("\t\t~~~~~~~~~~~\n");
-        display.append("\t\t1 - Torrent List\n");
+        while(user !=0){
+            clear();
+            System.out.println(display);
+            Scanner reader = new Scanner(System.in);
+            user = reader.nextInt();
+            switch (user){
+                case 1:
+                    torrentList();
+                    break;
+                case 2:
+                    check();
+                    break;
+                case 3:
+                    System.out.println("You Shall Not Pass!");
+                    break;
+                case 0:
+                    exit();
+                    break;
+                default:
+                    unknownInput();
+            }
+        }
+    }
+
+    private static void torrentList(){
+        int user = 1;
+        StringBuilder display = new StringBuilder("\t\t~Torrent List~\n" +
+                "\t\t~~~~~~~~~~~\n");
+
+        for(int i = 0; i < torrents.size(); ++i)
+            display.append("\t\t").append(i+1).append(" - ").append(torrents.get(i)).append("\n");
+
         display.append("\t\t0 - Exit\n");
 
-        Scanner reader = new Scanner(System.in);
-        System.out.println(display.toString());
+        while(user != 0) {
+            clear();
+            System.out.println(display);
+            Scanner reader = new Scanner(System.in);
+            user = reader.nextInt();
+            if(user > 0 && user <= torrents.size()){
+                String file = torrents.get(user-1);
+                System.out.println("~ " + file+ " requested");
+                fromUI.add(new GetTorrentFileRequest(file));
 
-        return reader.nextInt(); // Scans the next token of the input
+            }else if (user != 0){
+                System.out.println("Invalid input");
+            }
+        }
     }
 
-    private static int torrentList(){
-        System.out.println("Tested\n");
-        return 0;
+    private static boolean check(){
+
+        fromUI.add(new GetTorrentListRequest());
+
+        boolean x = false;
+        Response r = toUI.poll();
+
+        if(r != null){
+            if(r instanceof GetTorrentListResponse){
+               torrents = ((GetTorrentListResponse) r).getFiles();
+               x = true;
+               System.out.println("Test????");
+            }
+        }
+        return x;
     }
 
-    private static Thread getDeepThread(Request request, ServerSocket s){
-        //Thread manager
-        //static int?
-        if(request instanceof GetTorrentListRequest){
-            //return new TorrentListThread(s);
-        }
+    private static void exit(){
+        fromUI.add(new ShutDownRequest());
+        String display = "\t\t~Thank you for using DeepTorrent~\n";
+        clear();
+        System.out.println(display);
+    }
 
-        if(request instanceof GetTorrentFileRequest){
-            //return new TorrentFileThread(request, port);
-        }
+    private static void unknownInput(){
+        String display = "\t\t~!Unknown input!~\n";
+        clear();
+        System.out.println(display);
+    }
 
-        return null;
+    private static void clear(){
+        try {
+            Runtime.getRuntime().exec("clear");
+            //Runtime.getRuntime().exec("cls");
+        } catch (IOException e){
+            DeepLogger.log(e.getMessage());
+        }
     }
 }

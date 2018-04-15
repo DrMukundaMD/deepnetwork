@@ -41,6 +41,6 @@ public class TorrentListThread extends Thread{
 
         }
 
-        callingThread.closeThread();
+        callingThread.closeThread(true, "");
     }
 }
