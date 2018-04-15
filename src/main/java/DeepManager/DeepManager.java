@@ -6,27 +6,28 @@ import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class DeepManager extends Thread implements ThreadStuff{
     private static DeepManager DM;
     private HashMap<String, DeepTorrentManager> torrents;
-    //todo make concurrent?
-    private Queue<String> doneQueue;
+    private BlockingQueue<String> UIQueue;
+    private BlockingQueue<String> doneQueue;
     private String server;
     private int port;
 
-    private DeepManager(boolean isServerFlag) {
+    private DeepManager(boolean isServerFlag, BlockingQueue<String> UIQueue) {
         torrents = new HashMap<>();
-        doneQueue = new ArrayDeque<>();
+        doneQueue = new LinkedBlockingQueue<>();
+        this.UIQueue = UIQueue;
         server = "ada";
         port = 6345;
     }
 
-    public static synchronized DeepManager getInstance() {
+    public static synchronized DeepManager getInstance(boolean flag, BlockingQueue<String> UI) {
         File file = new File(TorrentFolder.getSegments(), ".dm");
 
         if (DM == null)
@@ -40,7 +41,7 @@ public class DeepManager extends Thread implements ThreadStuff{
                     DeepLogger.log(e.getMessage());
                 }
             } else
-                DM = new DeepManager(false);
+                DM = new DeepManager(flag, UI);
 
         return DM;
     }

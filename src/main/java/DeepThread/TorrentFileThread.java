@@ -44,6 +44,6 @@ public class TorrentFileThread extends Thread {
             DeepLogger.log(e.getMessage());
 
         }
-        callingThread.closeThread();
+        //callingThread.closeThread();
     }
 }

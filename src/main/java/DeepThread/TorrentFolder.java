@@ -13,7 +13,7 @@ public class TorrentFolder {
         toTorrent = new File("to_torrent");
         torrents = new File(".torrents");
         segments = new File(".segments");
-        done = new File("done");
+        done = new File("downloads");
 
         getToTorrent();
         getTorrents();

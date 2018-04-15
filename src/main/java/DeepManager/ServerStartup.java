@@ -1,6 +1,5 @@
 package DeepManager;
 
-import DeepManager.MakeTorrents;
 import DeepNetwork.GetPort;
 import DeepThread.*;
 
