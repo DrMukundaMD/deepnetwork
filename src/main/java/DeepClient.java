@@ -6,6 +6,7 @@
 -------------------------------*/
 
 import DeepManager.ClientStartup;
+import DeepManager.DeepManager;
 import DeepNetwork.GetTorrentFileRequest;
 import DeepNetwork.GetTorrentListRequest;
 import DeepNetwork.GetTorrentListResponse;
@@ -15,89 +16,52 @@ import DeepThread.DeepLogger;
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 class DeepClient {
 
     private static final int port = 6345;
+    public static BlockingQueue<String> UIQueue;
 
     public static void main(String[] args) {
         //String serverName = args[0];
         String serverName = "ada";
 
+        UIQueue = new LinkedBlockingDeque<>();
+
+        DeepManager DM = new DeepManager(true,UIQueue);
         ClientStartup.main(null);
+        System.out.println("~DeepClient started~");
+        int user = 1;
+        while(user !=0){
+            user = menu();
 
-        try {
-            System.out.println("~DeepClient started~");
+            if(user == 1)
+                user = torrentList();
 
-            Socket serverMain = new Socket(serverName, port);
-
-            ObjectOutputStream output = new ObjectOutputStream(serverMain.getOutputStream());
-
-            GetTorrentListRequest request = new GetTorrentListRequest();
-
-            output.writeObject(request);
-
-            DataInputStream i = new DataInputStream(serverMain.getInputStream());
-
-            int port1 = i.readInt();
-
-            serverMain.close();
-
-            i.close();
-
-            System.out.println("Received port # "+ port1);
-
-            serverMain = new Socket(serverName, port1);
-
-
-
-            ObjectInputStream input = new ObjectInputStream(serverMain.getInputStream());
-
-            Object object = input.readObject();
-
-
-
-            if(object instanceof GetTorrentListResponse){
-
-                ArrayList<String> r = ((GetTorrentListResponse) object).getFiles();
-
-                System.out.println("Response:");
-
-                for(String s: r){
-
-                    System.out.println(s);
-
-                }
-
-            }
-
-            else{ System.out.println("Object error"); }
-
-
-
-            //InputStream inFromServer = client.getInputStream();
-
-            //DataInputStream in = new DataInputStream(inFromServer);
-
-            //String hash = DeepHash.getHash(input.getBytes());
-
-            //System.out.println("Hash from input: " + hash);
-
-            //String server_hash = in.readUTF();
-
-            //System.out.println("Hash from server " + server_hash);
-
-            //if (hash.equals(server_hash))
-
-               // System.out.println("Hashs are equal.");
-
-            input.close();
-            output.close();
-            serverMain.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            DeepLogger.log(e.getMessage());
         }
+
+    }
+
+    private static int menu(){
+        StringBuilder display = new StringBuilder();
+
+        display.append("\t\t~Main Menu~\n");
+        display.append("\t\t~~~~~~~~~~~\n");
+        display.append("\t\t1 - Torrent List\n");
+        display.append("\t\t0 - Exit\n");
+
+        Scanner reader = new Scanner(System.in);
+        System.out.println(display.toString());
+
+        return reader.nextInt(); // Scans the next token of the input
+    }
+
+    private static int torrentList(){
+        System.out.println("Tested\n");
+        return 0;
     }
 
     private static Thread getDeepThread(Request request, ServerSocket s){

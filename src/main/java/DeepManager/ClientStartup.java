@@ -9,6 +9,5 @@ public class ClientStartup {
         new DeepLogger(System.currentTimeMillis());
         new TorrentFolder();
         new GetPort();
-
     }
 }

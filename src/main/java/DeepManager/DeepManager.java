@@ -19,7 +19,7 @@ public class DeepManager extends Thread implements ThreadStuff{
     private String server;
     private int port;
 
-    private DeepManager(boolean isServerFlag, BlockingQueue<String> UIQueue) {
+    public DeepManager(boolean isServerFlag, BlockingQueue<String> UIQueue) {
         torrents = new HashMap<>();
         doneQueue = new LinkedBlockingQueue<>();
         this.UIQueue = UIQueue;
@@ -48,8 +48,16 @@ public class DeepManager extends Thread implements ThreadStuff{
 
     @Override
     public void run(){
-        while(true){ //user is not ended
+        boolean on = true;
+        while(on){ //user is not ended
+            try{
+                String msg = UIQueue.take();
 
+                if(msg.equals("get"));
+
+            } catch (InterruptedException e){
+                DeepLogger.log(e.getMessage());
+            }
             // user.request1 (get new torrent list)
 
             // user.request2 (get torrent)
