@@ -36,7 +36,7 @@ class DeepClient {
 
         fromUI = new LinkedBlockingDeque<>();
         toUI = new LinkedBlockingDeque<>();
-        DeepManager DM = DeepManager.getInstance(true,fromUI,toUI);
+        DeepManager DM = DeepManager.getInstance(fromUI,toUI);
 
         DM.start();
 

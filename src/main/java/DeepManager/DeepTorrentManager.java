@@ -10,6 +10,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
+import java.util.logging.Logger;
 
 public class DeepTorrentManager extends Thread{
     private BlockingQueue<Request> fromDM;
@@ -50,30 +51,33 @@ public class DeepTorrentManager extends Thread{
         //todo get hashes
 
         while(!done && on){
-            boolean done = false;
+            boolean cycle = false;
 
 //            String peer = getPeer();
 //
 //            if (peer == null){
 //                requestPeers();
-//                done = true;
+//                cycle = true;
 //            }
 //
-//            if(!done){
+//            if(!cycle){
 //                int segment = getNextSegment();
 //                requestSegment(peer, segment);
 //            }
+
             try {
                 sleep(1000);
             } catch (InterruptedException e){
                 DeepLogger.log(e.getMessage());
             }
+
             update();
         }
 
-        if(done)
-            DM.closeThread(true, filename);
+        if(done) {
             //MergeFilePieces.merge(filename);
+            DM.closeThread(true, filename);
+        }
         System.out.println("~DTM " + filename + " Closed~");
     }
 
@@ -218,28 +222,35 @@ public class DeepTorrentManager extends Thread{
 
     private ObjectInputStream portCycle(String host, int port, Request request){
         try{
-            // create stuff
-            Socket serverMain = new Socket(host, port);
-            ObjectOutputStream output = new ObjectOutputStream(serverMain.getOutputStream());
+            while(true) {
+                // create stuff
+                Socket serverMain = new Socket(host, port);
+                ObjectOutputStream output = new ObjectOutputStream(serverMain.getOutputStream());
+                ObjectInputStream input = new ObjectInputStream(serverMain.getInputStream());
 
-            // write request
-            output.writeObject(request);
+                // write request & get response
+                output.writeObject(request);
+                Object newPort = input.readObject();
 
-            // get new port
-            DataInputStream input = new DataInputStream(serverMain.getInputStream());
-            int newPort = input.readInt();
+                // close socket
+                input.close();
+                output.close();
+                serverMain.close();
 
-            // close socket
-            input.close();
-            output.close();
-            serverMain.close();
+                // get new port
+                PortResponse pr;
 
-            // open connection on new port
-            serverMain = new Socket(host, newPort);
+                if (newPort instanceof PortResponse) {
+                    pr = (PortResponse) newPort;
+                    if (pr.getPort() != 0) {
+                        serverMain = new Socket(host, pr.getPort());
+                        return new ObjectInputStream(serverMain.getInputStream());
+                    }
+                }
+                DeepLogger.log("PortCycle infinite loop.");
+            }
 
-            return new ObjectInputStream(serverMain.getInputStream());
-
-        } catch (IOException e){
+        } catch (IOException | ClassNotFoundException e){
             e.printStackTrace();
             DeepLogger.log(e.getMessage());
         }

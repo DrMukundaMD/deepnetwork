@@ -17,10 +17,10 @@ public class DeepThreadManager implements ThreadStuff{
         this.maxThreads = maxThreads;
     }
 
-    public int reception(Object obj){
+    public PortResponse reception(Object obj){
 
         if (numberOfThreads == maxThreads){
-            return -1;
+            return new PortResponse(0);
         }
 
         if (obj instanceof DeepNetwork.Request || obj instanceof Response){
@@ -31,7 +31,7 @@ public class DeepThreadManager implements ThreadStuff{
             ServerPort s = GetPort.getPort();
             Thread deepThread = getRequestThread((Request) obj, s.getS());
             deepThread.start();
-            return s.getPort();
+            return new PortResponse(s.getPort());
         }
 
         if (obj instanceof Response) {
@@ -39,7 +39,7 @@ public class DeepThreadManager implements ThreadStuff{
             deepThread.start();
         }
 
-        return -1;
+        return new PortResponse(-1);
     }
 
     private synchronized void openThread(){

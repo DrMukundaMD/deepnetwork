@@ -7,11 +7,13 @@
 
 import DeepManager.DeepThreadManager;
 import DeepManager.ServerStartup;
+import DeepNetwork.PortResponse;
 import DeepThread.*;
 
 import java.io.DataOutputStream;
 import java.io.ObjectInputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.ServerSocket;
 
@@ -25,28 +27,33 @@ class DeepServer {
         try {
             ServerSocket serverSocket = new ServerSocket(PORT);
             //serverSocket.setSoTimeout(10000); //this is 10 seconds
-            int newPort;
+            PortResponse newPort;
             Socket socket;
             DeepThreadManager manager = new DeepThreadManager(100);
             System.out.println("~DeepServer Started~");
 
             while(true){
+                // accept
                 socket = serverSocket.accept();
 
                 try {
-                    ObjectInputStream stream = new ObjectInputStream(socket.getInputStream());
-                    Object object = stream.readObject();
+                    ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+                    Object object = input.readObject();
                     newPort = manager.reception(object);
 
-                    if(newPort != -1) {
-                        DataOutputStream r = new DataOutputStream(socket.getOutputStream());
-                        r.writeInt(newPort);
+                    if(newPort.getPort() != -1) {
+                        ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+                        output.writeObject(newPort);
+                        output.close();
                     }
+
+                    input.close();
 
                 } catch (ClassNotFoundException e){
                     DeepLogger.log(e.getMessage());
                 }
 
+                // reset
                 socket.close();
             }
 

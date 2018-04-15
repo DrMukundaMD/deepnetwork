@@ -10,21 +10,20 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class DeepManager extends Thread implements ThreadStuff{
-    private static DeepManager DM;
     private HashMap<String, DeepTorrentManager> torrents;
-    private BlockingQueue<Request> fromUI;
-    private BlockingQueue<Response> toUI;
-    private BlockingQueue<Request> fromDM;
-    private BlockingQueue<Response> toDM;
     private BlockingQueue<String> doneQueue;
+    private BlockingQueue<Request> fromUI;
+    private BlockingQueue<Request> fromDM;
+    private BlockingQueue<Response> toUI;
+    //private BlockingQueue<Response> toDM;
+    private static DeepManager DM;
     private String server;
     private int port;
 
-    public DeepManager(boolean isServerFlag, BlockingQueue<Request> fromUI, BlockingQueue<Response> toUI) {
+    public DeepManager(BlockingQueue<Request> fromUI, BlockingQueue<Response> toUI) {
         torrents = new HashMap<>();
         doneQueue = new LinkedBlockingQueue<>();
         fromDM = new LinkedBlockingQueue<>();
@@ -34,7 +33,7 @@ public class DeepManager extends Thread implements ThreadStuff{
         port = 6345;
     }
 
-    public static synchronized DeepManager getInstance(boolean flag, BlockingQueue<Request> fromUI,
+    public static synchronized DeepManager getInstance(BlockingQueue<Request> fromUI,
                                                        BlockingQueue<Response> toUI) {
         File file = new File(TorrentFolder.getSegments(), ".dm");
 
@@ -49,7 +48,7 @@ public class DeepManager extends Thread implements ThreadStuff{
                     DeepLogger.log(e.getMessage());
                 }
             } else
-                DM = new DeepManager(flag, fromUI, toUI);
+                DM = new DeepManager(fromUI, toUI);
 
         return DM;
     }
