@@ -89,7 +89,8 @@ public class DeepTorrentManager extends Thread{
     // -- Segments --
 
     private void addSegment(int num, byte[] segment){
-        DeepLogger.log("Added segment " + num);
+        DeepLogger.log("Added segment " + num + " size:" + segment.length);
+        DeepLogger.log("segment hash: " + DeepHash.getHash(segment));
         if(DeepHash.compareHash(segment, hashes.get(num))) {
             Gson gson = new Gson();
             File segmentFile = new File(TorrentFolder.getSegments(), filename);

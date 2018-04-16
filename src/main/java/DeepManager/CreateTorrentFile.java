@@ -25,7 +25,7 @@ public class CreateTorrentFile {
         File segment_folder = new File(TorrentFolder.getSegments(), file.getName());
         segment_folder.delete();
         segment_folder.mkdir();
-
+        DeepLogger.log(file.toString());
         // Open file and read
         try (FileInputStream inputStream = new FileInputStream(file);
              BufferedInputStream bStream = new BufferedInputStream(inputStream)) {
