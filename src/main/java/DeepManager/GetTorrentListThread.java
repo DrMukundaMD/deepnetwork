@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 
 public class GetTorrentListThread extends Thread{
@@ -33,10 +32,12 @@ public class GetTorrentListThread extends Thread{
             // create stuff
             Socket serverMain = new Socket(host, port);
             ObjectOutputStream output = new ObjectOutputStream(serverMain.getOutputStream());
-            ObjectInputStream input = new ObjectInputStream(serverMain.getInputStream());
+            DeepLogger.log("Writing request");
+            output.writeObject(request);
 
             // write request & get response
-            output.writeObject(request);
+            ObjectInputStream input = new ObjectInputStream(serverMain.getInputStream());
+            DeepLogger.log("Getting port object");
             Object newPort = input.readObject();
 
             // close socket
@@ -50,6 +51,7 @@ public class GetTorrentListThread extends Thread{
             if (newPort instanceof PortResponse) {
                 pr = (PortResponse) newPort;
                 if (pr.getPort() != 0) {
+                    DeepLogger.log("Getting new socket");
                     serverMain = new Socket(host, pr.getPort());
                 }
             }

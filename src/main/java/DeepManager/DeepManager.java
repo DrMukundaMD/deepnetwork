@@ -64,6 +64,7 @@ public class DeepManager extends Thread implements ThreadStuff{
 
                     // user.request1 (get new torrent list)
                     if (r instanceof GetTorrentListRequest) {
+                        DeepLogger.log("Get Torrent List User Request");
                         Thread t = new GetTorrentListThread(toDM, server, port);
                         t.start();
                     }
@@ -71,6 +72,7 @@ public class DeepManager extends Thread implements ThreadStuff{
                     // user.request2 (get torrent)
 
                     if(r instanceof GetTorrentFileRequest){
+                        DeepLogger.log("Get Torrent File User Request");
                         startTorrent(((GetTorrentFileRequest) r).getFilename());
                     }
 

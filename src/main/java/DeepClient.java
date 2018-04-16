@@ -34,7 +34,7 @@ class DeepClient {
         ClientStartup.main(null);
         torrents = new ArrayList<>();
         done = new ArrayList<>();
-        CLS.main();
+        //CLS.main();
 
         fromUI = new LinkedBlockingDeque<>();
         toUI = new LinkedBlockingDeque<>();
