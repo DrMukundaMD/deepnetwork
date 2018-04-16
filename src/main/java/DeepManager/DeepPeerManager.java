@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class DeepPeerManager {
-    private static ArrayList<String> array;
-    private static int dead;
-    private static int used;
+    private ArrayList<String> array;
+    private int dead;
+    private int used;
 
     DeepPeerManager(){
         array = new ArrayList<>();
@@ -28,12 +28,12 @@ public class DeepPeerManager {
         return dead == 0;
     }
 
-    private static String swap(int x, int y){
+    private String swap(int x, int y){
         String temp = array.set(y, array.get(x));
         return array.set(x, temp);
     }
 
-    private static void dead(String d){
+    private void dead(String d){
         if(dead == 0) {
             DeepLogger.log("Error in DeepPeerManager");
         }
@@ -44,14 +44,14 @@ public class DeepPeerManager {
         used(index);
     }
 
-    private static String used(int index){
-        if(used == 0)
-            used = dead;
+    private String used(int index){
         used--;
         return swap(index,used);
     }
 
-    private static String get(){
+    private String get(){
+        if(used == 0)
+            used = dead;
         Random rand = new Random();
         int pick = rand.nextInt(used);
         return used(pick);
