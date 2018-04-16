@@ -17,6 +17,7 @@ public class DeepManager extends Thread implements ThreadStuff{
     private BlockingQueue<String> doneQueue;
     private BlockingQueue<Request> fromUI;
     private BlockingQueue<Response> toUI;
+    private BlockingQueue<Response> toDM;
 
     private static DeepManager DM;
     private String server;
@@ -25,6 +26,7 @@ public class DeepManager extends Thread implements ThreadStuff{
     public DeepManager(BlockingQueue<Request> fromUI, BlockingQueue<Response> toUI) {
         torrents = new HashMap<>();
         doneQueue = new LinkedBlockingQueue<>();
+        toDM = new LinkedBlockingQueue<>();
         this.fromUI = fromUI;
         this.toUI = toUI;
         server = "ada";
@@ -62,11 +64,8 @@ public class DeepManager extends Thread implements ThreadStuff{
 
                     // user.request1 (get new torrent list)
                     if (r instanceof GetTorrentListRequest) {
-                        ArrayList<String> test = new ArrayList<>();
-                        test.add("test1.file");
-                        test.add("test2.file");
-                        test.add("test3.file");
-                        toUI.add(new GetTorrentListResponse(test));
+                        new GetTorrentListThread(toDM, server, port);
+
                     }
 
                     // user.request2 (get torrent)
@@ -83,6 +82,20 @@ public class DeepManager extends Thread implements ThreadStuff{
                         }
                         on = false;
                         System.out.println("~DeepManager Closed~");
+                    }
+                }
+
+                if(toDM.size() > 0) {
+                    Response r = toDM.poll();
+
+                    if(r instanceof GetTorrentListResponse){
+                        toUI.add(r);
+                    }else {
+                        ArrayList<String> test = new ArrayList<>();
+                        test.add("test1.file");
+                        test.add("test2.file");
+                        test.add("test3.file");
+                        toUI.add(new GetTorrentListResponse(test));
                     }
                 }
 
