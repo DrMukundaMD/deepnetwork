@@ -11,16 +11,19 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
 
 public class GetPeersThread extends Thread{
     private GetPeersRequest request;
     private ThreadStuff callingThread;
     private ServerSocket responseSocket;
+    private BlockingQueue<ArrayList<String>> peers;
 
-    public GetPeersThread(ThreadStuff callingThread, ServerSocket responseSocket, Request request){
+    public GetPeersThread(ThreadStuff callingThread, ServerSocket responseSocket, Request request, BlockingQueue<ArrayList<String>> peers){
         this.callingThread = callingThread;
         this.responseSocket = responseSocket;
         this.request = (GetPeersRequest) request;
+        this.peers = peers;
     }
 
     @Override
@@ -30,7 +33,15 @@ public class GetPeersThread extends Thread{
             Socket socket = responseSocket.accept();
 
             //Set Response
-            GetPeersResponse response = Peers.get(request.getFilename());
+            // todo use
+
+            ArrayList<String> list = peers.take();
+
+
+
+            GetPeersResponse response = new GetPeersResponse(request.getFilename(), new ArrayList<>(list));
+
+            peers.add(list);
 
             //Reply
             ObjectOutputStream stream = new ObjectOutputStream(socket.getOutputStream());
@@ -40,11 +51,11 @@ public class GetPeersThread extends Thread{
             stream.close();
             socket.close();
 
-        } catch (IOException e){
+        } catch (IOException | InterruptedException e){
             e.printStackTrace();
             DeepLogger.log(e.getMessage());
         }
 
-        //callingThread.closeThread();
+        callingThread.closeThread(true, "");
     }
 }

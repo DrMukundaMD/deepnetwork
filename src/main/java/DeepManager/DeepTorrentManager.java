@@ -66,7 +66,7 @@ public class DeepTorrentManager extends Thread{
 //            }
 
             try {
-                sleep(1000);
+                sleep(10000);
             } catch (InterruptedException e){
                 DeepLogger.log(e.getMessage());
             }
@@ -96,6 +96,10 @@ public class DeepTorrentManager extends Thread{
             }
             segmentFlags[num] = true;
         }
+    }
+
+    public BlockingQueue<Request> getFromDM() {
+        return fromDM;
     }
 
     public byte[] getSegment(int num){
@@ -269,6 +273,7 @@ public class DeepTorrentManager extends Thread{
 
             if (r instanceof ShutDownRequest) {
                 close = true;
+                System.out.println("DTM " +filename + " shutdown by request.");
             }
         }
 

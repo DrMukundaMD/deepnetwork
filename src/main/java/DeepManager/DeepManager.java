@@ -79,8 +79,11 @@ public class DeepManager extends Thread implements ThreadStuff{
 
                     // user shutdown
                     if (r instanceof ShutDownRequest) {
+                        for(DeepTorrentManager dtm : torrents.values()){
+                            BlockingQueue<Request> q = dtm.getFromDM();
+                            q.add(new ShutDownRequest());
+                        }
                         on = false;
-                        fromDM.add(new ShutDownRequest());
                         System.out.println("~DeepManager Closed~");
                     }
                 }
@@ -113,7 +116,7 @@ public class DeepManager extends Thread implements ThreadStuff{
 
     private void startTorrent(String filename) {
         if (!torrents.containsKey(filename)) {
-            DeepTorrentManager dtm = new DeepTorrentManager(filename, server, port, fromDM, this);
+            DeepTorrentManager dtm = new DeepTorrentManager(filename, server, port, new LinkedBlockingQueue<>(), this);
             torrents.put(filename, dtm);
             dtm.start();
         }

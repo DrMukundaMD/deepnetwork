@@ -1,29 +1,59 @@
 package DeepThread;
 
-import DeepNetwork.GetPeersResponse;
-
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Peers {
-    private static HashMap<String,ArrayList<String>> map;
+    private HashMap<String,BlockingQueue<ArrayList<String>>> map;
 
     public Peers() {
         map = new HashMap<>();
     }
 
-    public static ArrayList<String> getPeers(String file){
-        return map.get(file);
+    public BlockingQueue<ArrayList<String>> get(String filename){
+        if(map.containsKey(filename)) {
+            return map.get(filename);
+        }
+
+        BlockingQueue<ArrayList<String>> retVal = new LinkedBlockingQueue<>();
+
+        ArrayList<String> peers = new ArrayList<>();
+
+        try {
+            String host = InetAddress.getLocalHost().getHostName();
+            peers.add(host);
+        }catch (UnknownHostException e){
+            DeepLogger.log(e.getMessage());
+        }
+        retVal.add(peers);
+
+
+
+        return retVal;
     }
 
-    public static void add(String filename, String hostname){
-        ArrayList<String> list = map.get(filename);
-        if(list == null)
-            list = new ArrayList<>();
-        list.add(hostname);
-    }
+    public void add(String filename, String hostname){
+        BlockingQueue<ArrayList<String>> queue = map.get(filename);
 
-    public static GetPeersResponse get(String filename){
-        return new GetPeersResponse(filename, map.get(filename));
+        try {
+            ArrayList<String> peers = queue.take();
+            try {
+                String host = InetAddress.getLocalHost().getHostName();
+                if(peers.contains(host))
+                    peers.remove(host);
+            }catch (UnknownHostException e){
+                DeepLogger.log(e.getMessage());
+            }
+
+            peers.add(hostname);
+            queue.put(peers);
+
+        } catch (InterruptedException e){
+            DeepLogger.log(e.getMessage());
+        }
     }
 }

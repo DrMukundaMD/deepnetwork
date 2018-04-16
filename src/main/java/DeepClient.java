@@ -11,6 +11,7 @@ import DeepNetwork.*;
 import DeepThread.DeepLogger;
 
 import java.io.*;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
@@ -28,7 +29,14 @@ class DeepClient {
     public static void main(String[] args) {
         //String serverName = args[0];
         //String serverName = "ada";
+        try {
+            java.net.InetAddress localMachine = java.net.InetAddress.getLocalHost();
+            System.out.println("Hostname of local machine: " + localMachine.getHostName());
+        } catch (UnknownHostException e){
+            System.out.println("Unable to locate host name");
+        }
 
+        //~ Client StartUp ~
         ClientStartup.main(null);
         torrents = new ArrayList<>();
         done = new ArrayList<>();

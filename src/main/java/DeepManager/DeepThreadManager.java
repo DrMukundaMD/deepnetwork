@@ -1,20 +1,19 @@
 package DeepManager;
 
 import DeepNetwork.*;
-import DeepThread.GetPeersThread;
-import DeepThread.TorrentFileThread;
-import DeepThread.TorrentListThread;
-import DeepThread.UnknownRequestThread;
+import DeepThread.*;
 
 import java.net.ServerSocket;
 
 public class DeepThreadManager implements ThreadStuff{
     private static int numberOfThreads;
     private int maxThreads;
+    private static Peers peers;
 
     public DeepThreadManager(int maxThreads){
         numberOfThreads = 0;
         this.maxThreads = maxThreads;
+        peers = new Peers();
     }
 
     public PortResponse reception(Object obj){
@@ -61,7 +60,11 @@ public class DeepThreadManager implements ThreadStuff{
         }
 
         if(r instanceof GetPeersRequest){
-            return new GetPeersThread(this, s, r);
+            return new GetPeersThread(this, s, r, peers.get(((GetPeersRequest) r).getFilename()));
+        }
+
+        if(r instanceof GetFilePieceRequest){
+            return new GetFilePieceThread(this, s, r);
         }
 
         return new UnknownRequestThread(this, s);
@@ -69,8 +72,7 @@ public class DeepThreadManager implements ThreadStuff{
 
     private Thread getResponseThread(Response r){
         if(r instanceof LogPeer){
-            //return new LogThread(s);
-            int x = 0;
+            peers.add(((LogPeer) r).getFilename(),((LogPeer) r).getHostname());
         }
         return null;
     }
