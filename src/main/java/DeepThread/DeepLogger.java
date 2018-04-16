@@ -28,6 +28,6 @@ public class DeepLogger {
     }
     public static void log(String message){
         LOGGER.log(Level.FINE, message + System.lineSeparator());
-        //System.out.println(message);
+        System.out.println(message);
     }
 }

@@ -64,8 +64,8 @@ public class DeepManager extends Thread implements ThreadStuff{
 
                     // user.request1 (get new torrent list)
                     if (r instanceof GetTorrentListRequest) {
-                        new GetTorrentListThread(toDM, server, port);
-
+                        Thread t = new GetTorrentListThread(toDM, server, port);
+                        t.start();
                     }
 
                     // user.request2 (get torrent)

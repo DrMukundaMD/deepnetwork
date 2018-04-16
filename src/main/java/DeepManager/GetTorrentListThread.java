@@ -26,6 +26,7 @@ public class GetTorrentListThread extends Thread{
 
     @Override
     public void run() {
+        System.out.println("~GetTorrentListTread started~");
         // create request
         GetTorrentListRequest request = new GetTorrentListRequest();
         try {
@@ -63,5 +64,6 @@ public class GetTorrentListThread extends Thread{
         } catch (IOException | ClassNotFoundException e){
             DeepLogger.log(e.getMessage());
         }
+        System.out.println("~GetTorrentListTread closed~");
     }
 }
