@@ -36,6 +36,8 @@ public class DeepTorrentManager extends Thread{
         this.filename = filename;
         peers = new DeepPeerManager();
 
+        startup();
+
 //        numOfSegments = hashes.size();
 //        segmentFlags = new boolean[numOfSegments];
 //
@@ -236,6 +238,13 @@ public class DeepTorrentManager extends Thread{
     }
 
     // -- Control --
+
+    private void startup(){
+        File file = new File(TorrentFolder.getSegments(), filename);
+        if(!file.isDirectory()){
+            file.mkdir();
+        }
+    }
 
     private ObjectInputStream portCycle(String host, int port, Request request){
         try{

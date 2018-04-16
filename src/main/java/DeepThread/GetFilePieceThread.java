@@ -4,6 +4,7 @@ import DeepManager.ThreadStuff;
 import DeepNetwork.GetFilePieceRequest;
 import DeepNetwork.GetFilePieceResponse;
 import DeepNetwork.Request;
+import com.google.gson.Gson;
 
 
 import java.io.*;
@@ -56,17 +57,26 @@ public class GetFilePieceThread extends Thread{
 
         //todo hash check for fault tolerance
 
-        try (FileInputStream inputStream = new FileInputStream(file);
-             BufferedInputStream bStream = new BufferedInputStream(inputStream)) {
-
-            if((bStream.read(buffer)) > 0) {
-                inputStream.close();
-                bStream.close();
-                DeepLogger.log("Segment read i think.");
-            }
-        } catch (IOException e){
+        Gson gson = new Gson();
+        try (FileReader reader = new FileReader(file)) {
+            buffer = gson.fromJson(reader, byte[].class);
+            DeepLogger.log("No shit");
+        }
+        catch (IOException e){
             DeepLogger.log(e.getMessage());
         }
+
+//        try (FileInputStream inputStream = new FileInputStream(file);
+//             BufferedInputStream bStream = new BufferedInputStream(inputStream)) {
+//
+//            if((bStream.read(buffer)) > 0) {
+//                inputStream.close();
+//                bStream.close();
+//                DeepLogger.log("Segment read i think.");
+//            }
+//        } catch (IOException e){
+//            DeepLogger.log(e.getMessage());
+//        }
 
         return new GetFilePieceResponse(filename, num, buffer);
     }

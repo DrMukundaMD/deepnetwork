@@ -23,7 +23,7 @@ public class DeepHash {
         } catch (NoSuchAlgorithmException e){
             DeepLogger.log(e.getMessage());
         }
-        DeepLogger.log(output.toString());
+        //DeepLogger.log(output.toString());
         return output.toString();
     }
 
