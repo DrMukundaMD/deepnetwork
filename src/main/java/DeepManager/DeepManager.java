@@ -16,9 +16,8 @@ public class DeepManager extends Thread implements ThreadStuff{
     private HashMap<String, DeepTorrentManager> torrents;
     private BlockingQueue<String> doneQueue;
     private BlockingQueue<Request> fromUI;
-    private BlockingQueue<Request> fromDM;
     private BlockingQueue<Response> toUI;
-    //private BlockingQueue<Response> toDM;
+
     private static DeepManager DM;
     private String server;
     private int port;
@@ -26,7 +25,6 @@ public class DeepManager extends Thread implements ThreadStuff{
     public DeepManager(BlockingQueue<Request> fromUI, BlockingQueue<Response> toUI) {
         torrents = new HashMap<>();
         doneQueue = new LinkedBlockingQueue<>();
-        fromDM = new LinkedBlockingQueue<>();
         this.fromUI = fromUI;
         this.toUI = toUI;
         server = "ada";

@@ -5,12 +5,11 @@
 	COMP 512
 -------------------------------*/
 
-import DeepManager.DeepThreadManager;
+import DeepManager.DeepServerManager;
 import DeepManager.ServerStartup;
 import DeepNetwork.PortResponse;
 import DeepThread.*;
 
-import java.io.DataOutputStream;
 import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -29,7 +28,7 @@ class DeepServer {
             //serverSocket.setSoTimeout(10000); //this is 10 seconds
             PortResponse newPort;
             Socket socket;
-            DeepThreadManager manager = new DeepThreadManager(100);
+            DeepServerManager manager = new DeepServerManager(100);
             System.out.println("~DeepServer Started~");
 
             while(true){

@@ -5,12 +5,12 @@ import DeepThread.*;
 
 import java.net.ServerSocket;
 
-public class DeepThreadManager implements ThreadStuff{
+public class DeepServerManager implements ThreadStuff{
     private static int numberOfThreads;
     private int maxThreads;
     private static Peers peers;
 
-    public DeepThreadManager(int maxThreads){
+    public DeepServerManager(int maxThreads){
         numberOfThreads = 0;
         this.maxThreads = maxThreads;
         peers = new Peers();
@@ -72,7 +72,8 @@ public class DeepThreadManager implements ThreadStuff{
 
     private Thread getResponseThread(Response r){
         if(r instanceof LogPeer){
-            peers.add(((LogPeer) r).getFilename(),((LogPeer) r).getHostname());
+            LogPeer lp = (LogPeer) r;
+            peers.add(lp.getFilename(),lp.getHostname());
         }
         return null;
     }

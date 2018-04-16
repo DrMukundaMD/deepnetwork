@@ -15,12 +15,14 @@ public class Peers {
     }
 
     public BlockingQueue<ArrayList<String>> get(String filename){
+        // If it exists
         if(map.containsKey(filename)) {
             return map.get(filename);
         }
-
+        // create a new one
         BlockingQueue<ArrayList<String>> retVal = new LinkedBlockingQueue<>();
 
+        // create an array list for it
         ArrayList<String> peers = new ArrayList<>();
 
         try {
@@ -31,14 +33,12 @@ public class Peers {
         }
         retVal.add(peers);
 
-
-
         return retVal;
     }
 
     public void add(String filename, String hostname){
         BlockingQueue<ArrayList<String>> queue = map.get(filename);
-
+        // todo remove ada if here
         try {
             ArrayList<String> peers = queue.take();
             try {

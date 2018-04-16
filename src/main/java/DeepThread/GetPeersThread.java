@@ -26,6 +26,7 @@ public class GetPeersThread extends Thread{
         this.peers = peers;
     }
 
+    // Server code?
     @Override
     public void run(){
         try{
@@ -36,8 +37,6 @@ public class GetPeersThread extends Thread{
             // todo use
 
             ArrayList<String> list = peers.take();
-
-
 
             GetPeersResponse response = new GetPeersResponse(request.getFilename(), new ArrayList<>(list));
 

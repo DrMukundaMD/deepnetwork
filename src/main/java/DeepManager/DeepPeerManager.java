@@ -10,7 +10,7 @@ public class DeepPeerManager {
     private static int dead;
     private static int used;
 
-    public DeepPeerManager(){
+    DeepPeerManager(){
         array = new ArrayList<>();
     }
 

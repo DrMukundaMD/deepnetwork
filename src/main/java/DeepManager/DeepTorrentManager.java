@@ -52,24 +52,24 @@ public class DeepTorrentManager extends Thread{
 
         while(!done && on){
             boolean cycle = false;
+            String peer = null;
 
-//            String peer = getPeer();
-//
-//            if (peer == null){
-//                requestPeers();
-//                cycle = true;
-//            }
-//
-//            if(!cycle){
-//                int segment = getNextSegment();
-//                requestSegment(peer, segment);
-//            }
+            if (peers.isEmpty()){
+                requestPeers();
+                cycle = true;
+            } else
+                peer = getPeer();
 
-            try {
-                sleep(10000);
-            } catch (InterruptedException e){
-                DeepLogger.log(e.getMessage());
+            if(!cycle){
+                int segment = getNextSegment();
+                requestSegment(peer, segment);
             }
+
+//            try {
+//                sleep(10000);
+//            } catch (InterruptedException e){
+//                DeepLogger.log(e.getMessage());
+//            }
 
             update();
         }
@@ -136,53 +136,54 @@ public class DeepTorrentManager extends Thread{
     }
 
     private void requestSegment(String host, int segment){
-        try{
-            // create stuff
-            Socket serverMain = new Socket(host, port);
-            ObjectOutputStream output = new ObjectOutputStream(serverMain.getOutputStream());
-            GetFilePieceRequest request = new GetFilePieceRequest(filename, segment);
+        if(host != null)
+            try{
+                // create stuff
+                Socket serverMain = new Socket(host, port);
+                ObjectOutputStream output = new ObjectOutputStream(serverMain.getOutputStream());
+                GetFilePieceRequest request = new GetFilePieceRequest(filename, segment);
 
-            // write request
-            output.writeObject(request);
+                // write request
+                output.writeObject(request);
 
-            // get new port
-            DataInputStream input = new DataInputStream(serverMain.getInputStream());
-            int newPort = input.readInt();
+                // get new port
+                DataInputStream input = new DataInputStream(serverMain.getInputStream());
+                int newPort = input.readInt();
 
-            // close socket
-            input.close();
-            output.close();
-            serverMain.close();
+                // close socket
+                input.close();
+                output.close();
+                serverMain.close();
 
-            // open connection on new port
-            serverMain = new Socket(host, newPort);
+                // open connection on new port
+                serverMain = new Socket(host, newPort);
 
-            // get response
-            ObjectInputStream stream = new ObjectInputStream(serverMain.getInputStream());
+                // get response
+                ObjectInputStream stream = new ObjectInputStream(serverMain.getInputStream());
 
-            try {
-                Object response = stream.readObject();
+                try {
+                    Object response = stream.readObject();
 
-                if(response instanceof GetFilePieceResponse){
-                    GetFilePieceResponse r = (GetFilePieceResponse) response;
-                    addSegment(r.getPiece(), r.getSegment());
+                    if(response instanceof GetFilePieceResponse){
+                        GetFilePieceResponse r = (GetFilePieceResponse) response;
+                        addSegment(r.getPiece(), r.getSegment());
+                    }
+
+                    if(response instanceof UnknownRequestResponse){
+                        DeepLogger.log("Error: UnknownRequestResponse in requestSegment for torrent: " + filename);
+                    }
+                }catch (ClassNotFoundException e){
+                    DeepLogger.log(e.getMessage());
                 }
 
-                if(response instanceof UnknownRequestResponse){
-                    DeepLogger.log("Error: UnknownRequestResponse in requestSegment for torrent: " + filename);
-                }
-            }catch (ClassNotFoundException e){
+                //Close
+                stream.close();
+                serverMain.close();
+
+            } catch (IOException e){
+                e.printStackTrace();
                 DeepLogger.log(e.getMessage());
             }
-
-            //Close
-            stream.close();
-            serverMain.close();
-
-        } catch (IOException e){
-            e.printStackTrace();
-            DeepLogger.log(e.getMessage());
-        }
     }
 
     // -- Peers --
@@ -194,7 +195,6 @@ public class DeepTorrentManager extends Thread{
     private String getPeer(){
         return peers.getPeer();
     }
-
 
     private void requestPeers(){
         // create request
@@ -211,8 +211,7 @@ public class DeepTorrentManager extends Thread{
             }
 
             if(response instanceof UnknownRequestResponse){
-                //do stuff
-                int x = 0;
+                DeepLogger.log("UnknownRequest in DTM: " + filename);
             }
         stream.close();
         }catch (ClassNotFoundException | IOException e){
