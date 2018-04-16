@@ -21,8 +21,6 @@ public class DeepPeerManager {
     }
 
     public String getPeer() {
-        if(used == 0)
-            return null;
         return get();
     }
 

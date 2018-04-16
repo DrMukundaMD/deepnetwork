@@ -120,6 +120,7 @@ public class DeepTorrentManager extends Thread{
         File segment = new File(TorrentFolder.getSegments(), filename);
         File file = new File(segment, Integer.toString(num));
         //todo maybe add hash check here for fault tolerance?
+        //todo can't use this. need to use gson
         try (FileInputStream inputStream = new FileInputStream(file);
              BufferedInputStream bStream = new BufferedInputStream(inputStream)) {
 
@@ -171,8 +172,8 @@ public class DeepTorrentManager extends Thread{
     }
 
     private void requestSegment(String host, int segment){
-        if(host != null)
-            try{
+        if(host != null) {
+            try {
                 GetFilePieceRequest request = new GetFilePieceRequest(filename, segment);
 
                 // port cycle
@@ -181,25 +182,28 @@ public class DeepTorrentManager extends Thread{
                 try {
                     Object response = stream.readObject();
 
-                    if(response instanceof GetFilePieceResponse){
+                    if (response instanceof GetFilePieceResponse) {
                         GetFilePieceResponse r = (GetFilePieceResponse) response;
                         addSegment(r.getPiece(), r.getSegment());
                     }
 
-                    if(response instanceof UnknownRequestResponse){
+                    if (response instanceof UnknownRequestResponse) {
                         DeepLogger.log("Error: UnknownRequestResponse in requestSegment for torrent: " + filename);
                     }
-                }catch (ClassNotFoundException e){
+                } catch (ClassNotFoundException e) {
                     DeepLogger.log(e.getMessage());
                 }
 
                 //Close
                 stream.close();
 
-            } catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
                 DeepLogger.log(e.getMessage());
             }
+        }else{
+            DeepLogger.log("No host");
+        }
     }
 
     // -- Peers --

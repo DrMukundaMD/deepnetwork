@@ -42,11 +42,13 @@ public class DeepServerManager implements ThreadStuff{
     }
 
     private synchronized void openThread(){
+        DeepLogger.log("DeepServer Thread opened");
         numberOfThreads++;
     }
 
     public synchronized void closeThread(boolean flag, String filename){
         // Add some static object management here?
+        DeepLogger.log("DeepServer Thread closed");
         numberOfThreads--;
     }
 
