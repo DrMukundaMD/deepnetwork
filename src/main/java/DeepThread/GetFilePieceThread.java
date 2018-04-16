@@ -62,8 +62,8 @@ public class GetFilePieceThread extends Thread{
             if((bStream.read(buffer)) > 0) {
                 inputStream.close();
                 bStream.close();
+                DeepLogger.log("Segment read i think.");
             }
-            DeepLogger.log("Segment not read, still sending over network.");
         } catch (IOException e){
             DeepLogger.log(e.getMessage());
         }

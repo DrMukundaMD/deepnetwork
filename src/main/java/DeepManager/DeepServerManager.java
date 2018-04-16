@@ -52,18 +52,22 @@ public class DeepServerManager implements ThreadStuff{
 
     private Thread getRequestThread(Request r, ServerSocket s){
         if(r instanceof GetTorrentListRequest){
+            DeepLogger.log("~Request " + r.type() + "~");
             return new TorrentListThread(this, s);
         }
 
         if(r instanceof GetTorrentFileRequest){
+            DeepLogger.log("~Request " + r.type() + "~");
             return new TorrentFileThread(this, s, r);
         }
 
         if(r instanceof GetPeersRequest){
+            DeepLogger.log("~Request " + r.type() + "~");
             return new GetPeersThread(this, s, r, peers.get(((GetPeersRequest) r).getFilename()));
         }
 
         if(r instanceof GetFilePieceRequest){
+            DeepLogger.log("~Request " + r.type() + "~");
             return new GetFilePieceThread(this, s, r);
         }
 

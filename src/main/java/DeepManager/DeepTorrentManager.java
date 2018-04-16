@@ -10,6 +10,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 public class DeepTorrentManager extends Thread{
@@ -46,9 +47,13 @@ public class DeepTorrentManager extends Thread{
 
     @Override
     public void run(){
-        System.out.println("~DTM " + filename + " Started~");
-        hashes = new ArrayList<>();
-        //todo get hashes
+        DeepLogger.log("~DTM " + filename + " Started~");
+        hashes = getHashes();
+        numOfSegments = hashes.size();
+        DeepLogger.log("~Hashes: " + hashes.toString() + "\nSize: " + numOfSegments);
+        segmentFlags = new boolean[numOfSegments];
+        for(int i = 0; i < numOfSegments; i++)
+            segmentFlags[i] = false;
 
         while(!done && on){
             boolean cycle = false;
@@ -75,7 +80,7 @@ public class DeepTorrentManager extends Thread{
         }
 
         if(done) {
-            //MergeFilePieces.merge(filename);
+            MergeFilePieces.merge(filename);
             DM.closeThread(true, filename);
         }
         System.out.println("~DTM " + filename + " Closed~");
@@ -84,6 +89,7 @@ public class DeepTorrentManager extends Thread{
     // -- Segments --
 
     private void addSegment(int num, byte[] segment){
+        DeepLogger.log("Added segment " + num);
         if(DeepHash.compareHash(segment, hashes.get(num))) {
             Gson gson = new Gson();
             File segmentFile = new File(TorrentFolder.getSegments(), filename);
@@ -95,6 +101,7 @@ public class DeepTorrentManager extends Thread{
                 DeepLogger.log(e.getMessage());
             }
             segmentFlags[num] = true;
+            DeepLogger.log("segment added" + num);
         }
     }
 
@@ -135,31 +142,38 @@ public class DeepTorrentManager extends Thread{
         return -1;
     }
 
+    private ArrayList<String> getHashes(){
+        ArrayList<String> retval = null;
+        GetTorrentFileRequest request = new GetTorrentFileRequest(filename);
+
+        // port cycle
+        ObjectInputStream stream = portCycle(server, port, request);
+
+        try {
+            Object response = stream.readObject();
+
+            if(response instanceof GetTorrentFileResponse){
+                retval = ((GetTorrentFileResponse) response).getTorrent();
+            }
+
+            if(response instanceof UnknownRequestResponse){
+                DeepLogger.log("UnknownRequest in DTM: " + filename);
+            }
+            stream.close();
+        }catch (ClassNotFoundException | IOException e){
+            DeepLogger.log(e.getMessage());
+        }
+
+        return retval;
+    }
+
     private void requestSegment(String host, int segment){
         if(host != null)
             try{
-                // create stuff
-                Socket serverMain = new Socket(host, port);
-                ObjectOutputStream output = new ObjectOutputStream(serverMain.getOutputStream());
                 GetFilePieceRequest request = new GetFilePieceRequest(filename, segment);
 
-                // write request
-                output.writeObject(request);
-
-                // get new port
-                DataInputStream input = new DataInputStream(serverMain.getInputStream());
-                int newPort = input.readInt();
-
-                // close socket
-                input.close();
-                output.close();
-                serverMain.close();
-
-                // open connection on new port
-                serverMain = new Socket(host, newPort);
-
-                // get response
-                ObjectInputStream stream = new ObjectInputStream(serverMain.getInputStream());
+                // port cycle
+                ObjectInputStream stream = portCycle(host, port, request);
 
                 try {
                     Object response = stream.readObject();
@@ -178,7 +192,6 @@ public class DeepTorrentManager extends Thread{
 
                 //Close
                 stream.close();
-                serverMain.close();
 
             } catch (IOException e){
                 e.printStackTrace();
@@ -229,10 +242,10 @@ public class DeepTorrentManager extends Thread{
                 // create stuff
                 Socket serverMain = new Socket(host, port);
                 ObjectOutputStream output = new ObjectOutputStream(serverMain.getOutputStream());
-                ObjectInputStream input = new ObjectInputStream(serverMain.getInputStream());
+                output.writeObject(request);
 
                 // write request & get response
-                output.writeObject(request);
+                ObjectInputStream input = new ObjectInputStream(serverMain.getInputStream());
                 Object newPort = input.readObject();
 
                 // close socket
@@ -278,19 +291,21 @@ public class DeepTorrentManager extends Thread{
 
         boolean done = true;
 
-        for(int i = 0; i < numOfSegments; ++i){
+        for(int i = 0; i < numOfSegments; i++){
             if(!segmentFlags[i])
                 done = false;
         }
 
-        if(done){ this.done = true; }
+        if(done){
+            DeepLogger.log("~"+filename+" done.");
+            this.done = true;
+        }
         if(close){this.on = false;}
     }
 
     public String getFilename() {
         return filename;
     }
-
 
     private void writeT(ArrayList<String> torrent){
 

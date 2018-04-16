@@ -29,7 +29,7 @@ class DeepServer {
             PortResponse newPort;
             Socket socket;
             DeepServerManager manager = new DeepServerManager(100);
-            System.out.println("~DeepServer Started~");
+            DeepLogger.log("~DeepServer Started~");
 
             while(true){
                 // accept
