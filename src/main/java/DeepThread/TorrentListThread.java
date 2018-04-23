@@ -1,8 +1,7 @@
 package DeepThread;
 
 import DeepNetwork.GetTorrentListResponse;
-import DeepThread.DeepLogger;
-import DeepManager.ThreadStuff;
+import DeepServer.ServerThreadStuff;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -11,9 +10,9 @@ import java.net.Socket;
 
 public class TorrentListThread extends Thread{
     private ServerSocket responseSocket;
-    private ThreadStuff callingThread;
+    private ServerThreadStuff callingThread;
 
-    public TorrentListThread(ThreadStuff callingThread, ServerSocket responseSocket){
+    public TorrentListThread(ServerThreadStuff callingThread, ServerSocket responseSocket){
         this.callingThread = callingThread;
         this.responseSocket = responseSocket;
     }
@@ -41,6 +40,6 @@ public class TorrentListThread extends Thread{
 
         }
 
-        callingThread.closeThread(true, "");
+        callingThread.closeThread();
     }
 }

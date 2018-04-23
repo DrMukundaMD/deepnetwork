@@ -1,9 +1,8 @@
 package DeepThread;
 
-import DeepManager.ThreadStuff;
+import DeepServer.ServerThreadStuff;
 import DeepNetwork.GetPeersRequest;
 import DeepNetwork.GetPeersResponse;
-import DeepNetwork.GetTorrentFileResponse;
 import DeepNetwork.Request;
 
 import java.io.IOException;
@@ -15,11 +14,11 @@ import java.util.concurrent.BlockingQueue;
 
 public class GetPeersThread extends Thread{
     private GetPeersRequest request;
-    private ThreadStuff callingThread;
+    private ServerThreadStuff callingThread;
     private ServerSocket responseSocket;
     private BlockingQueue<ArrayList<String>> peers;
 
-    public GetPeersThread(ThreadStuff callingThread, ServerSocket responseSocket, Request request, BlockingQueue<ArrayList<String>> peers){
+    public GetPeersThread(ServerThreadStuff callingThread, ServerSocket responseSocket, Request request, BlockingQueue<ArrayList<String>> peers){
         this.callingThread = callingThread;
         this.responseSocket = responseSocket;
         this.request = (GetPeersRequest) request;
@@ -55,6 +54,6 @@ public class GetPeersThread extends Thread{
             DeepLogger.log(e.getMessage());
         }
 
-        callingThread.closeThread(true, "");
+        callingThread.closeThread();
     }
 }

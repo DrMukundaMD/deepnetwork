@@ -1,4 +1,4 @@
-package DeepManager;
+package DeepClient;
 
 import DeepNetwork.*;
 import DeepThread.DeepLogger;
@@ -10,8 +10,6 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Logger;
 
 public class DeepTorrentManager extends Thread{
     private BlockingQueue<Request> fromDM;

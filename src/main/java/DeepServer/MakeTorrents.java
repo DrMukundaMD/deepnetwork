@@ -1,5 +1,6 @@
-package DeepManager;
+package DeepServer;
 
+import DeepServer.CreateTorrentFile;
 import DeepThread.DeepLogger;
 import DeepThread.TorrentFolder;
 

@@ -1,4 +1,4 @@
-package DeepManager;
+package DeepServer;
 
 import DeepNetwork.DeepHash;
 import DeepThread.DeepLogger;

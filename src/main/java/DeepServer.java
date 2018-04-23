@@ -5,8 +5,8 @@
 	COMP 512
 -------------------------------*/
 
-import DeepManager.DeepServerManager;
-import DeepManager.ServerStartup;
+import DeepServer.DeepServerManager;
+import DeepServer.ServerStartup;
 import DeepNetwork.PortResponse;
 import DeepThread.*;
 

@@ -5,13 +5,12 @@
 	COMP 512
 -------------------------------*/
 
-import DeepManager.ClientStartup;
-import DeepManager.DeepManager;
+import DeepClient.ClientStartup;
+import DeepClient.DeepManager;
 import DeepNetwork.*;
 import DeepThread.DeepLogger;
 
 import java.io.*;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
@@ -118,9 +117,9 @@ class DeepClient {
         display.append("\t\t0 - Exit\n");
 
         System.out.println(display);
-        int user;
+        System.out.println("enter to continue...");
         Scanner reader = new Scanner(System.in);
-        user = reader.nextInt();
+        reader.nextInt();
     }
 
     private static void getList(){

@@ -1,4 +1,4 @@
-package DeepManager;
+package DeepClient;
 
 import DeepNetwork.GetTorrentListRequest;
 import DeepNetwork.GetTorrentListResponse;

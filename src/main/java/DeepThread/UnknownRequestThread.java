@@ -1,8 +1,7 @@
 package DeepThread;
 
-import DeepManager.ThreadStuff;
+import DeepServer.ServerThreadStuff;
 import DeepNetwork.UnknownRequestResponse;
-import DeepThread.DeepLogger;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -11,9 +10,9 @@ import java.net.Socket;
 
 public class UnknownRequestThread extends Thread{
     private ServerSocket responseSocket;
-    private ThreadStuff callingThread;
+    private ServerThreadStuff callingThread;
 
-    public UnknownRequestThread(ThreadStuff callingThread, ServerSocket responseSocket){
+    public UnknownRequestThread(ServerThreadStuff callingThread, ServerSocket responseSocket){
         this.callingThread = callingThread;
         this.responseSocket = responseSocket;
     }
@@ -41,6 +40,6 @@ public class UnknownRequestThread extends Thread{
 
         }
 
-        callingThread.closeThread(true, "");
+        callingThread.closeThread();
     }
 }

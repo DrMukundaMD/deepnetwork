@@ -1,11 +1,11 @@
-package DeepManager;
+package DeepServer;
 
 import DeepNetwork.*;
 import DeepThread.*;
 
 import java.net.ServerSocket;
 
-public class DeepServerManager implements ThreadStuff{
+public class DeepServerManager implements ServerThreadStuff {
     private static int numberOfThreads;
     private int maxThreads;
     private static Peers peers;
@@ -46,8 +46,7 @@ public class DeepServerManager implements ThreadStuff{
         numberOfThreads++;
     }
 
-    public synchronized void closeThread(boolean flag, String filename){
-        // Add some static object management here?
+    public synchronized void closeThread(){
         DeepLogger.log("DeepServer Thread closed");
         numberOfThreads--;
     }

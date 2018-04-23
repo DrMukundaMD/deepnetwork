@@ -1,4 +1,4 @@
-package DeepManager;
+package DeepClient;
 
 import DeepNetwork.*;
 import DeepThread.DeepLogger;
@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class DeepManager extends Thread implements ThreadStuff{
+public class DeepManager extends Thread implements ClientThreadStuff {
     private HashMap<String, DeepTorrentManager> torrents;
     private BlockingQueue<String> doneQueue;
     private BlockingQueue<Request> fromUI;
@@ -124,6 +124,10 @@ public class DeepManager extends Thread implements ThreadStuff{
         if(flag){
             doneQueue.add(file);
         }
+
+    }
+    @Override
+    public void contact(String filename){
 
     }
 

@@ -1,6 +1,6 @@
 package DeepThread;
 
-import DeepManager.ThreadStuff;
+import DeepServer.ServerThreadStuff;
 import DeepNetwork.GetFilePieceRequest;
 import DeepNetwork.GetFilePieceResponse;
 import DeepNetwork.Request;
@@ -13,10 +13,10 @@ import java.net.Socket;
 
 public class GetFilePieceThread extends Thread{
     private GetFilePieceRequest request;
-    private ThreadStuff callingThread;
+    private ServerThreadStuff callingThread;
     private ServerSocket responseSocket;
 
-    public GetFilePieceThread(ThreadStuff callingThread, ServerSocket responseSocket, Request request){
+    public GetFilePieceThread(ServerThreadStuff callingThread, ServerSocket responseSocket, Request request){
         this.callingThread = callingThread;
         this.responseSocket = responseSocket;
         this.request = (GetFilePieceRequest) request;
@@ -44,7 +44,7 @@ public class GetFilePieceThread extends Thread{
             DeepLogger.log(e.getMessage());
         }
 
-        callingThread.closeThread(true, "");
+        callingThread.closeThread();
     }
 
     private GetFilePieceResponse getFilePiece(String filename, int num){
