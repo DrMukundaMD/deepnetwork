@@ -13,7 +13,7 @@ import java.util.concurrent.BlockingQueue;
 
 public class DeepTorrentManager extends Thread{
     private BlockingQueue<Request> fromDM;
-    private DeepManager DM;
+    private DeepClientManager DM;
     private ArrayList<String> hashes;
     private boolean[] segmentFlags;
     private DeepPeerManager peers;
@@ -24,7 +24,7 @@ public class DeepTorrentManager extends Thread{
     private boolean on;
     private int port;
 
-    DeepTorrentManager(String filename, String server, int port, BlockingQueue<Request> fromDM, DeepManager DM){
+    DeepTorrentManager(String filename, String server, int port, BlockingQueue<Request> fromDM, DeepClientManager DM){
         on = true;
         done = false;
         this.DM = DM;

@@ -1,5 +1,6 @@
 package DeepThread;
 
+import DeepClient.ClientThreadStuff;
 import DeepServer.ServerThreadStuff;
 import DeepNetwork.UnknownRequestResponse;
 
@@ -11,9 +12,15 @@ import java.net.Socket;
 public class UnknownRequestThread extends Thread{
     private ServerSocket responseSocket;
     private ServerThreadStuff callingThread;
+    private ClientThreadStuff callingThread_;
 
     public UnknownRequestThread(ServerThreadStuff callingThread, ServerSocket responseSocket){
         this.callingThread = callingThread;
+        this.responseSocket = responseSocket;
+    }
+
+    public UnknownRequestThread(ClientThreadStuff callingThread, ServerSocket responseSocket){
+        this.callingThread_ = callingThread;
         this.responseSocket = responseSocket;
     }
 
@@ -40,6 +47,9 @@ public class UnknownRequestThread extends Thread{
 
         }
 
-        callingThread.closeThread();
+        if(callingThread != null)
+            callingThread.closeThread();
+        else
+            callingThread_.closeThread(true, "");
     }
 }

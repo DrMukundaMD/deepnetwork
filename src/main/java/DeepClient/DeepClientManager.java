@@ -12,18 +12,18 @@ import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class DeepManager extends Thread implements ClientThreadStuff {
+public class DeepClientManager extends Thread implements ClientThreadStuff {
     private HashMap<String, DeepTorrentManager> torrents;
     private BlockingQueue<String> doneQueue;
     private BlockingQueue<Request> fromUI;
     private BlockingQueue<Response> toUI;
     private BlockingQueue<Response> toDM;
 
-    private static DeepManager DM;
+    private static DeepClientManager DM;
     private String server;
     private int port;
 
-    public DeepManager(BlockingQueue<Request> fromUI, BlockingQueue<Response> toUI) {
+    private DeepClientManager(BlockingQueue<Request> fromUI, BlockingQueue<Response> toUI) {
         torrents = new HashMap<>();
         doneQueue = new LinkedBlockingQueue<>();
         toDM = new LinkedBlockingQueue<>();
@@ -33,22 +33,22 @@ public class DeepManager extends Thread implements ClientThreadStuff {
         port = 6345;
     }
 
-    public static synchronized DeepManager getInstance(BlockingQueue<Request> fromUI,
-                                                       BlockingQueue<Response> toUI) {
+    public static synchronized DeepClientManager getInstance(BlockingQueue<Request> fromUI,
+                                                             BlockingQueue<Response> toUI) {
         File file = new File(TorrentFolder.getSegments(), ".dm");
 
         if (DM == null)
             if(file.exists()){
                 Gson gson = new Gson();
                 try (FileReader reader = new FileReader(file)) {
-                    DM = gson.fromJson(reader,DeepManager.class);
+                    DM = gson.fromJson(reader, DeepClientManager.class);
                 }
                 catch (Exception e){
                     e.printStackTrace();
                     DeepLogger.log(e.getMessage());
                 }
             } else
-                DM = new DeepManager(fromUI, toUI);
+                DM = new DeepClientManager(fromUI, toUI);
 
         return DM;
     }

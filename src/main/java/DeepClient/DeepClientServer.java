@@ -1,23 +1,18 @@
-/*-----------------------------*
-	04/10/2018
-	Mukunda Mensah
-	Dr. Linda Null
-	COMP 512
--------------------------------*/
+package DeepClient;
 
+import DeepNetwork.PortResponse;
 import DeepServer.DeepServerManager;
 import DeepServer.ServerStartup;
-import DeepNetwork.PortResponse;
-import DeepThread.*;
+import DeepThread.DeepLogger;
 
-import java.io.ObjectInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
 import java.net.ServerSocket;
+import java.net.Socket;
 
-class DeepServer {
-    private static final int PORT = 6345;
+public class DeepClientServer {
+    private static final int PORT = 6752;
 
     public static void main(String [] args) {
 
@@ -28,8 +23,8 @@ class DeepServer {
             //serverSocket.setSoTimeout(10000); //this is 10 seconds
             PortResponse newPort;
             Socket socket;
-            DeepServerManager manager = new DeepServerManager(100);
-            DeepLogger.log("~DeepServer Started~");
+            DeepClientServerManager manager = new DeepClientServerManager(20);
+            DeepLogger.log("~DeepClientServer Started~");
 
             while(true){
                 // accept
@@ -37,8 +32,9 @@ class DeepServer {
 
                 try {
                     ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
-                    //DeepLogger.log("New connection accepted.");
+
                     Object object = input.readObject();
+
                     newPort = manager.reception(object);
 
                     if(newPort.getPort() != -1) {

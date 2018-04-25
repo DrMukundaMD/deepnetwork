@@ -6,7 +6,6 @@
 -------------------------------*/
 
 import DeepClient.ClientStartup;
-import DeepClient.DeepManager;
 import DeepNetwork.*;
 import DeepThread.DeepLogger;
 
@@ -37,7 +36,7 @@ class DeepClient {
 
         fromUI = new LinkedBlockingDeque<>();
         toUI = new LinkedBlockingDeque<>();
-        DeepManager DM = DeepManager.getInstance(fromUI,toUI);
+        DeepClient.DeepClientManager DM = DeepClient.DeepClientManager.getInstance(fromUI,toUI);
 
         DM.start();
 

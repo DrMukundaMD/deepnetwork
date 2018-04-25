@@ -1,5 +1,6 @@
 package DeepThread;
 
+import DeepClient.ClientThreadStuff;
 import DeepServer.ServerThreadStuff;
 import DeepNetwork.GetFilePieceRequest;
 import DeepNetwork.GetFilePieceResponse;
@@ -14,10 +15,17 @@ import java.net.Socket;
 public class GetFilePieceThread extends Thread{
     private GetFilePieceRequest request;
     private ServerThreadStuff callingThread;
+    private ClientThreadStuff callingThread_;
     private ServerSocket responseSocket;
 
     public GetFilePieceThread(ServerThreadStuff callingThread, ServerSocket responseSocket, Request request){
         this.callingThread = callingThread;
+        this.responseSocket = responseSocket;
+        this.request = (GetFilePieceRequest) request;
+    }
+
+    public GetFilePieceThread(ClientThreadStuff callingThread, ServerSocket responseSocket, Request request){
+        this.callingThread_ = callingThread;
         this.responseSocket = responseSocket;
         this.request = (GetFilePieceRequest) request;
     }
@@ -44,7 +52,10 @@ public class GetFilePieceThread extends Thread{
             DeepLogger.log(e.getMessage());
         }
 
-        callingThread.closeThread();
+        if(callingThread != null)
+            callingThread.closeThread();
+        else
+            callingThread_.closeThread(true, "");
     }
 
     private GetFilePieceResponse getFilePiece(String filename, int num){
@@ -65,18 +76,6 @@ public class GetFilePieceThread extends Thread{
         catch (IOException e){
             DeepLogger.log(e.getMessage());
         }
-
-//        try (FileInputStream inputStream = new FileInputStream(file);
-//             BufferedInputStream bStream = new BufferedInputStream(inputStream)) {
-//
-//            if((bStream.read(buffer)) > 0) {
-//                inputStream.close();
-//                bStream.close();
-//                DeepLogger.log("Segment read i think.");
-//            }
-//        } catch (IOException e){
-//            DeepLogger.log(e.getMessage());
-//        }
 
         return new GetFilePieceResponse(filename, num, buffer);
     }
