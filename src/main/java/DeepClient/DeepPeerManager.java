@@ -2,13 +2,16 @@ package DeepClient;
 
 import DeepThread.DeepLogger;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Queue;
 import java.util.Random;
 
 public class DeepPeerManager {
     private ArrayList<String> array;
     private int dead;
     private int used;
+    private int last;
 
     DeepPeerManager(){
         array = new ArrayList<>();
@@ -20,8 +23,13 @@ public class DeepPeerManager {
         dead = array.size();
     }
 
-    public String getPeer() {
-        return get();
+    public String getPeer(){
+        if(used == 0)
+            reset();
+
+        Random rand = new Random();
+        int pick = rand.nextInt(used);
+        return used(pick);
     }
 
     public boolean isEmpty(){
@@ -33,27 +41,26 @@ public class DeepPeerManager {
         return array.set(x, temp);
     }
 
-    private void dead(String d){
-        if(dead == 0) {
+    private void dead(){
+        if(dead != 0) {
+            dead--;
+            swap(last, dead);
+        } else
             DeepLogger.log("Error in DeepPeerManager");
-        }
-
-        dead--;
-        int index = array.indexOf(d);
-        swap(index, dead);
-        used(index);
     }
 
     private String used(int index){
         used--;
+        last = used;
         return swap(index,used);
     }
 
-    private String get(){
-        if(used == 0)
-            used = dead;
-        Random rand = new Random();
-        int pick = rand.nextInt(used);
-        return used(pick);
+
+    private void reset(){
+//        Queue<String> queue = new ArrayDeque<>();
+//        for(int i = used; i < dead; i++){
+//            queue.add(array.get(i));
+//        }
+        used = dead;
     }
 }
