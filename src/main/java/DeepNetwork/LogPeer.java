@@ -5,7 +5,7 @@ public class LogPeer extends Response{
     private String filename;
     private String hostname;
 
-    LogPeer(String filename, String hostname){
+    public LogPeer(String filename, String hostname){
         this.filename = filename;
         this.hostname = hostname;
     }

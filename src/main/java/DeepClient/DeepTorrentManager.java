@@ -7,6 +7,7 @@ import DeepThread.TorrentFolder;
 import com.google.gson.Gson;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
@@ -74,6 +75,7 @@ public class DeepTorrentManager extends Thread{
         }
 
         if(done) {
+            logAsPeer();
             MergeFilePieces.merge(filename);
             DM.closeThread(true, filename);
         }
@@ -217,6 +219,21 @@ public class DeepTorrentManager extends Thread{
         }
 
         //Close
+    }
+
+    private void logAsPeer(){
+        try {
+            String host = InetAddress.getLocalHost().getHostName();
+            LogPeer logPeer = new LogPeer(filename, host);
+            Socket serverMain = new Socket(webServer, webServerPort);
+            ObjectOutputStream output = new ObjectOutputStream(serverMain.getOutputStream());
+            output.writeObject(logPeer);
+            output.close();
+            serverMain.close();
+        } catch (IOException e){
+            DeepLogger.log(e.getMessage());
+        }
+
     }
 
     // -- Control --
