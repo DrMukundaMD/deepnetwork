@@ -12,48 +12,42 @@ import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 
 public class DeepTorrentManager extends Thread{
-    private BlockingQueue<Request> fromDM;
-    private DeepClientManager DM;
+    private transient BlockingQueue<Request> fromDM;
+    private transient DeepClientManager DM;
     private ArrayList<String> hashes;
     private boolean[] segmentFlags;
     private DeepPeerManager peers;
     private int numOfSegments;
     private String filename;
-    private String server;
+    private String webServer;
     private boolean done;
     private boolean on;
-    private int port;
+    private int webServerPort;
+    private int clientServerPort;
 
-    DeepTorrentManager(String filename, String server, int port, BlockingQueue<Request> fromDM, DeepClientManager DM){
+    DeepTorrentManager(String fn, String ws, int wsPort, int csPort, BlockingQueue<Request> fromDM, DeepClientManager DM){
         on = true;
         done = false;
         this.DM = DM;
-        this.port = port;
+        webServerPort = wsPort;
+        clientServerPort = csPort;
         this.fromDM = fromDM;
-        this.server = server;
-        this.filename = filename;
+        this.webServer = ws;
+        this.filename = fn;
         peers = new DeepPeerManager();
-
         startup();
-
-//        numOfSegments = hashes.size();
-//        segmentFlags = new boolean[numOfSegments];
-//
-//        for(int i = 0; i < numOfSegments; ++i)
-//            segmentFlags[i] = false;
-
-        //writeT(hashes);
     }
 
     @Override
     public void run(){
         DeepLogger.log("~DTM " + filename + " Started~");
+
+        // checks cached files or requests hash
         hashes = getHashes();
-        numOfSegments = hashes.size();
-        DeepLogger.log("~Hashes: " + hashes.toString() + "\nSize: " + numOfSegments);
-        segmentFlags = new boolean[numOfSegments];
-        for(int i = 0; i < numOfSegments; i++)
-            segmentFlags[i] = false;
+
+        // verifies cached segments are valid
+        check();
+
 
         while(!done && on){
             boolean cycle = false;
@@ -89,12 +83,10 @@ public class DeepTorrentManager extends Thread{
     // -- Segments --
 
     private void addSegment(int num, byte[] segment){
-        DeepLogger.log("Added segment " + num + " size:" + segment.length);
-        DeepLogger.log("segment hash: " + DeepHash.getHash(segment));
         if(DeepHash.compareHash(segment, hashes.get(num))) {
             Gson gson = new Gson();
-            File segmentFile = new File(TorrentFolder.getSegments(), filename);
-            File file = new File(segmentFile, Integer.toString(num));
+            File segmentFolder = new File(TorrentFolder.getSegments(), filename);
+            File file = new File(segmentFolder, Integer.toString(num));
 
             try (FileWriter writer = new FileWriter(file)) {
                 gson.toJson(segment, writer);
@@ -102,38 +94,15 @@ public class DeepTorrentManager extends Thread{
                 DeepLogger.log(e.getMessage());
             }
             segmentFlags[num] = true;
-            DeepLogger.log("segment added" + num);
+            writeFlags(segmentFlags);
+            DeepLogger.log("~Segment # " + num + " downloaded~");
+        }else{
+            DeepLogger.log("~Segment #" + num + " corrupted~");
         }
     }
 
     public BlockingQueue<Request> getFromDM() {
         return fromDM;
-    }
-
-    public byte[] getSegment(int num){
-
-        int buffer_size = 256 * 1024;  // 256KB standardized pieces
-        byte[] buffer = new byte[buffer_size];
-
-        File segment = new File(TorrentFolder.getSegments(), filename);
-        File file = new File(segment, Integer.toString(num));
-        //todo maybe add hash check here for fault tolerance?
-        //todo can't use this. need to use gson
-        try (FileInputStream inputStream = new FileInputStream(file);
-             BufferedInputStream bStream = new BufferedInputStream(inputStream)) {
-
-            if((bStream.read(buffer)) > 0) {
-                inputStream.close();
-                bStream.close();
-                return buffer;
-            }
-
-        } catch (Exception e){
-            //e.printStackTrace();
-            DeepLogger.log(e.getMessage());
-        }
-
-        return null;
     }
 
     private int getNextSegment(){
@@ -145,28 +114,35 @@ public class DeepTorrentManager extends Thread{
     }
 
     private ArrayList<String> getHashes(){
-        ArrayList<String> retval = null;
-        GetTorrentFileRequest request = new GetTorrentFileRequest(filename);
+        ArrayList<String> hashes = readT();
 
-        // port cycle
-        ObjectInputStream stream = portCycle(server, port, request);
+        if(hashes == null) { //Do not have cached hashes
+            GetTorrentFileRequest request = new GetTorrentFileRequest(filename);
 
-        try {
-            Object response = stream.readObject();
+            // port cycle
+            ObjectInputStream stream = portCycle(webServer, webServerPort, request);
 
-            if(response instanceof GetTorrentFileResponse){
-                retval = ((GetTorrentFileResponse) response).getTorrent();
+            try {
+                Object response = stream.readObject();
+
+                if(response instanceof GetTorrentFileResponse){
+                    hashes = ((GetTorrentFileResponse) response).getTorrent();
+                    writeT(hashes);
+                    numOfSegments = hashes.size();
+                    DeepLogger.log("~" + filename + " hashes received. Size: " + numOfSegments + "~");
+                }
+
+                if(response instanceof UnknownRequestResponse){
+                    DeepLogger.log("UnknownRequest in DTM: " + filename + " getHashes()");
+                }
+
+                stream.close();
+            }catch (ClassNotFoundException | IOException e){
+                DeepLogger.log(e.getMessage());
             }
-
-            if(response instanceof UnknownRequestResponse){
-                DeepLogger.log("UnknownRequest in DTM: " + filename);
-            }
-            stream.close();
-        }catch (ClassNotFoundException | IOException e){
-            DeepLogger.log(e.getMessage());
         }
 
-        return retval;
+        return hashes;
     }
 
     private void requestSegment(String host, int segment){
@@ -175,7 +151,11 @@ public class DeepTorrentManager extends Thread{
                 GetFilePieceRequest request = new GetFilePieceRequest(filename, segment);
 
                 // port cycle
-                ObjectInputStream stream = portCycle(host, port, request);
+                ObjectInputStream stream;
+                if(host.equals(webServer))
+                    stream = portCycle(host, webServerPort, request);
+                else
+                    stream = portCycle(host, clientServerPort, request);
 
                 try {
                     Object response = stream.readObject();
@@ -219,7 +199,7 @@ public class DeepTorrentManager extends Thread{
         GetPeersRequest request = new GetPeersRequest(filename);
 
         // port cycle
-        ObjectInputStream stream = portCycle(server, port, request);
+        ObjectInputStream stream = portCycle(webServer, webServerPort, request);
 
         try {
             Object response = stream.readObject();
@@ -242,10 +222,47 @@ public class DeepTorrentManager extends Thread{
     // -- Control --
 
     private void startup(){
-        File file = new File(TorrentFolder.getSegments(), filename);
-        if(!file.isDirectory()){
-            file.mkdir();
+        File segmentFolder = new File(TorrentFolder.getSegments(), filename);
+        File torrentFolder = new File(TorrentFolder.getTorrents(), filename);
+
+        if(!segmentFolder.isDirectory()){
+            segmentFolder.mkdir();
         }
+
+        if(!torrentFolder.isDirectory()){
+            torrentFolder.mkdir();
+        }
+    }
+
+    private void check(){
+        if(segmentFlags == null ) {
+            segmentFlags = new boolean[numOfSegments];
+        }
+
+        for(int i = 0; i < numOfSegments; i++){
+            segmentFlags[i] = false;
+        }
+
+        for (int i = 0; i < numOfSegments; i++) {
+            File segmentFile = new File(TorrentFolder.getSegments(), filename);
+            File file = new File(segmentFile, Integer.toString(i));
+
+            if(file.exists()) {
+                Gson gson = new Gson();
+                byte[] buffer;
+
+                try (FileReader reader = new FileReader(file)) {
+                    buffer = gson.fromJson(reader, byte[].class);
+                    if(DeepHash.compareHash(buffer, hashes.get(i)))
+                        segmentFlags[i] = true;
+                } catch (IOException e){
+                    DeepLogger.log(e.getMessage());
+                }
+            }
+
+        }
+
+        writeFlags(segmentFlags);
     }
 
     private ObjectInputStream portCycle(String host, int port, Request request){
@@ -301,18 +318,25 @@ public class DeepTorrentManager extends Thread{
             }
         }
 
-        boolean done = true;
-
-        for(int i = 0; i < numOfSegments; i++){
-            if(!segmentFlags[i])
-                done = false;
-        }
+        boolean done = checkSegments();
 
         if(done){
-            DeepLogger.log("~"+filename+" done.");
-            this.done = true;
+            check();
+
+            if(checkSegments()) {
+                DeepLogger.log("~" + filename + " done.");
+                this.done = true;
+            }
         }
         if(close){this.on = false;}
+    }
+
+    private boolean checkSegments(){
+        for(int i = 0; i < numOfSegments; i++){
+            if(!segmentFlags[i])
+                return false;
+        }
+        return true;
     }
 
     public String getFilename() {
@@ -326,6 +350,35 @@ public class DeepTorrentManager extends Thread{
 
         try (FileWriter writer = new FileWriter(file)) {
             gson.toJson(torrent, writer);
+        }
+        catch (Exception e){
+            DeepLogger.log(e.getMessage());
+        }
+    }
+
+    private ArrayList<String> readT(){
+
+        Gson gson = new Gson();
+        ArrayList<String> hashes;
+        File file = new File(TorrentFolder.getTorrents(), filename);
+
+        try (FileReader reader = new FileReader(file)) {
+            hashes = gson.fromJson(reader, ArrayList.class);
+        }
+        catch (IOException e){
+            DeepLogger.log(e.getMessage());
+            hashes = null;
+        }
+
+        return hashes;
+    }
+
+    private void writeFlags(boolean[] flags){
+        Gson gson = new Gson();
+        File file = new File(TorrentFolder.getTorrents(), filename);
+
+        try (FileWriter writer = new FileWriter(file)) {
+            gson.toJson(flags, writer);
         }
         catch (Exception e){
             DeepLogger.log(e.getMessage());

@@ -46,6 +46,7 @@ class DeepServer {
                         output.writeObject(newPort);
                         output.close();
                         DeepLogger.log("Sending new port # " + newPort.getPort());
+                        int x = 0;
                     }
 
                     input.close();

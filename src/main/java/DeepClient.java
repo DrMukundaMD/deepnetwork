@@ -140,6 +140,7 @@ class DeepClient {
     }
 
     private static void exit(){
+        //todo make this loop for all active torrents
         fromUI.add(new ShutDownRequest());
         String display = "\t\t~Thank you for using DeepTorrent~\n";
         clear();

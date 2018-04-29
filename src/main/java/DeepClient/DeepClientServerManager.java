@@ -8,12 +8,14 @@ import java.net.ServerSocket;
 public class DeepClientServerManager implements ClientThreadStuff {
     private static int numberOfThreads;
     private int maxThreads;
-    private static Peers peers; //todo do I need this?
+    private String host;
+//    private static Peers peers; //todo do I need this?
 
     DeepClientServerManager(int maxThreads){
         numberOfThreads = 0;
         this.maxThreads = maxThreads;
-        peers = new Peers();
+//        peers = new Peers();
+        this.host = "";
     }
 
     public PortResponse reception(Object obj){
@@ -31,6 +33,7 @@ public class DeepClientServerManager implements ClientThreadStuff {
             ServerPort s = GetPort.getPort();
             Thread thread = getRequestThread((Request) obj, s.getS());
             thread.start();
+            int x=0;
             return new PortResponse(s.getPort());
         }
 

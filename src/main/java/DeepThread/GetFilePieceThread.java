@@ -71,7 +71,6 @@ public class GetFilePieceThread extends Thread{
         Gson gson = new Gson();
         try (FileReader reader = new FileReader(file)) {
             buffer = gson.fromJson(reader, byte[].class);
-            DeepLogger.log("No shit");
         }
         catch (IOException e){
             DeepLogger.log(e.getMessage());
