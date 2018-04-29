@@ -1,21 +1,20 @@
 package DeepClient;
 
 import DeepNetwork.*;
+import DeepServer.ServerThreadStuff;
 import DeepThread.*;
 
 import java.net.ServerSocket;
 
-public class DeepClientServerManager implements ClientThreadStuff {
+public class DeepClientServerManager implements ServerThreadStuff {
     private static int numberOfThreads;
     private int maxThreads;
-    private String host;
-//    private static Peers peers; //todo do I need this?
+//    private String host;
 
     DeepClientServerManager(int maxThreads){
         numberOfThreads = 0;
         this.maxThreads = maxThreads;
-//        peers = new Peers();
-        this.host = "";
+//        this.host = "";
     }
 
     public PortResponse reception(Object obj){
@@ -61,23 +60,11 @@ public class DeepClientServerManager implements ClientThreadStuff {
             return new GetFilePieceThread(this, s, r);
         }
 
-        return new UnknownRequestThread(this, s);
-    }
-
-    private Thread getResponseThread(Response r){
-        if(r instanceof LogPeer){
-            LogPeer lp = (LogPeer) r;
+        if( r instanceof GetFileInfoRequest){
+            DeepLogger.log("~Request " + r.type() + "~");
+            return new GetFileInfoThread(this, s, r);
         }
-        return null;
-    }
 
-    @Override
-    public void closeThread(boolean flag, String filename) {
-
-    }
-
-    @Override
-    public void contact(String filename) {
-
+        return new UnknownRequestThread(this, s);
     }
 }

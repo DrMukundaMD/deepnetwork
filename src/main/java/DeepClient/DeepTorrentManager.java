@@ -363,7 +363,8 @@ public class DeepTorrentManager extends Thread{
     private void writeT(ArrayList<String> torrent){
 
         Gson gson = new Gson();
-        File file = new File(TorrentFolder.getTorrents(), filename);
+        File torrentFolder = new File(TorrentFolder.getTorrents(), filename);
+        File file = new File(torrentFolder, "hash");
 
         try (FileWriter writer = new FileWriter(file)) {
             gson.toJson(torrent, writer);
@@ -377,7 +378,8 @@ public class DeepTorrentManager extends Thread{
 
         Gson gson = new Gson();
         ArrayList<String> hashes;
-        File file = new File(TorrentFolder.getTorrents(), filename);
+        File torrentFolder = new File(TorrentFolder.getTorrents(), filename);
+        File file = new File(torrentFolder, "hash");
 
         try (FileReader reader = new FileReader(file)) {
             hashes = gson.fromJson(reader, ArrayList.class);
@@ -392,7 +394,8 @@ public class DeepTorrentManager extends Thread{
 
     private void writeFlags(boolean[] flags){
         Gson gson = new Gson();
-        File file = new File(TorrentFolder.getTorrents(), filename);
+        File torrentFolder = new File(TorrentFolder.getTorrents(), filename);
+        File file = new File(torrentFolder, "flags");
 
         try (FileWriter writer = new FileWriter(file)) {
             gson.toJson(flags, writer);
