@@ -16,7 +16,7 @@ public class Log extends Response {
 
     public String getHostname() { return hostname; }
     public String getMsg() { return msg; }
-    public String getLog() { return hostname + ":" + msg;}
+    public String getLog() { return hostname + " : " + time + " : " + msg;}
     public Instant getTime() { return time; }
 
     @Override

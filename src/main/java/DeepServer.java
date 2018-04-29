@@ -37,7 +37,6 @@ class DeepServer {
 
                 try {
                     ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
-                    //DeepLogger.log("New connection accepted.");
                     Object object = input.readObject();
                     newPort = manager.reception(object);
 

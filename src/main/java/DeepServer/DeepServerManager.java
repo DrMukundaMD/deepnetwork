@@ -6,14 +6,14 @@ import DeepThread.*;
 import java.net.ServerSocket;
 
 public class DeepServerManager implements ServerThreadStuff {
-    private static int numberOfThreads;
     private int maxThreads;
-    private static Peers peers;
+    private static ServerPeers peers;
+    private static int numberOfThreads;
 
     public DeepServerManager(int maxThreads){
         numberOfThreads = 0;
         this.maxThreads = maxThreads;
-        peers = new Peers();
+        peers = new ServerPeers();
     }
 
     public PortResponse reception(Object obj){
@@ -64,7 +64,7 @@ public class DeepServerManager implements ServerThreadStuff {
 
         if(r instanceof GetPeersRequest){
             DeepLogger.log("~Request " + r.type() + "~");
-            return new GetPeersThread(this, s, r, peers.get(((GetPeersRequest) r).getFilename()));
+            return new GetPeersThread(this, s, r, peers);
         }
 
         if(r instanceof GetFilePieceRequest){
@@ -78,8 +78,14 @@ public class DeepServerManager implements ServerThreadStuff {
     private Thread getResponseThread(Response r){
         if(r instanceof LogPeer){
             LogPeer lp = (LogPeer) r;
+            // todo this is a blocked call. may slow down execution or block indef
             peers.add(lp.getFilename(),lp.getHostname());
         }
+
+        if(r instanceof Log){
+            DeepLogger.log(((Log) r).getLog());
+        }
+
         return null;
     }
 }

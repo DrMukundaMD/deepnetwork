@@ -16,16 +16,15 @@ public class GetPeersThread extends Thread{
     private GetPeersRequest request;
     private ServerThreadStuff callingThread;
     private ServerSocket responseSocket;
-    private BlockingQueue<ArrayList<String>> peers;
+    private ServerPeers peers;
 
-    public GetPeersThread(ServerThreadStuff callingThread, ServerSocket responseSocket, Request request, BlockingQueue<ArrayList<String>> peers){
+    public GetPeersThread(ServerThreadStuff callingThread, ServerSocket responseSocket, Request request, ServerPeers peers){
         this.callingThread = callingThread;
         this.responseSocket = responseSocket;
         this.request = (GetPeersRequest) request;
         this.peers = peers;
     }
 
-    // Server code?
     @Override
     public void run(){
         try{
@@ -33,13 +32,8 @@ public class GetPeersThread extends Thread{
             Socket socket = responseSocket.accept();
 
             //Set Response
-            // todo use
 
-            ArrayList<String> list = peers.take();
-
-            GetPeersResponse response = new GetPeersResponse(request.getFilename(), new ArrayList<>(list));
-
-            peers.add(list);
+            GetPeersResponse response = new GetPeersResponse(request.getFilename(), peers.get(request.getFilename()));
 
             //Reply
             ObjectOutputStream stream = new ObjectOutputStream(socket.getOutputStream());
@@ -49,7 +43,7 @@ public class GetPeersThread extends Thread{
             stream.close();
             socket.close();
 
-        } catch (IOException | InterruptedException e){
+        } catch (IOException  e){
             e.printStackTrace();
             DeepLogger.log(e.getMessage());
         }
