@@ -47,7 +47,9 @@ public class DeepTorrentManager extends Thread{
         hashes = getHashes();
 
         this.on = true;
+        this.done = false;
         // verifies cached segments are valid
+        check();
         update();
 
 
