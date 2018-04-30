@@ -285,7 +285,7 @@ public class DeepTorrentManager extends Thread{
 
                     if(DeepHash.compareHash(buffer, hashes.get(i))) {
                         segmentFlags[i] = true;
-                        DeepLogger.log("~Piece # " + i + "valid~");
+//                        DeepLogger.log("~Piece # " + i + "valid~");
                     }
                 } catch (IOException e){
                     DeepLogger.log(e.getMessage());
