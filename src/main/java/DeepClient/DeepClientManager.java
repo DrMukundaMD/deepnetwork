@@ -66,7 +66,7 @@ public class DeepClientManager extends Thread implements ClientThreadStuff {
 
                     // user.request1 (get new torrent list)
                     if (r instanceof GetTorrentListRequest) {
-                        DeepLogger.log("Get Torrent List User Request");
+//                        DeepLogger.log("Get Torrent List User Request");
                         Thread t = new GetTorrentListThread(toDM, server, webPort);
                         t.start();
                     }
@@ -74,7 +74,7 @@ public class DeepClientManager extends Thread implements ClientThreadStuff {
                     // user.request2 (get torrent)
 
                     if(r instanceof GetTorrentFileRequest){
-                        DeepLogger.log("Get Torrent File User Request");
+//                        DeepLogger.log("Get Torrent File User Request");
                         startTorrent(((GetTorrentFileRequest) r).getFilename());
                     }
 

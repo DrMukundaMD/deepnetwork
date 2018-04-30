@@ -25,19 +25,19 @@ public class GetTorrentListThread extends Thread{
 
     @Override
     public void run() {
-        System.out.println("~GetTorrentListTread started~");
+//        System.out.println("~GetTorrentListTread started~");
         // create request
         GetTorrentListRequest request = new GetTorrentListRequest();
         try {
             // create stuff
             Socket serverMain = new Socket(host, port);
             ObjectOutputStream output = new ObjectOutputStream(serverMain.getOutputStream());
-            DeepLogger.log("Writing request");
+//            DeepLogger.log("Writing request");
             output.writeObject(request);
 
             // write request & get response
             ObjectInputStream input = new ObjectInputStream(serverMain.getInputStream());
-            DeepLogger.log("Getting port object");
+//            DeepLogger.log("Getting port object");
             Object newPort = input.readObject();
 
             // close socket
@@ -51,7 +51,7 @@ public class GetTorrentListThread extends Thread{
             if (newPort instanceof PortResponse) {
                 pr = (PortResponse) newPort;
                 if (pr.getPort() != 0) {
-                    DeepLogger.log("Getting new socket");
+//                    DeepLogger.log("Getting new socket");
                     serverMain = new Socket(host, pr.getPort());
                 }
             }
@@ -66,6 +66,6 @@ public class GetTorrentListThread extends Thread{
         } catch (IOException | ClassNotFoundException e){
             DeepLogger.log(e.getMessage());
         }
-        System.out.println("~GetTorrentListTread closed~");
+//        System.out.println("~GetTorrentListTread closed~");
     }
 }
