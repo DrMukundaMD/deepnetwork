@@ -7,6 +7,8 @@ import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
@@ -18,6 +20,9 @@ public class DeepClientManager extends Thread implements ClientThreadStuff {
     private BlockingQueue<Request> fromUI;
     private BlockingQueue<Response> toUI;
     private BlockingQueue<Response> toDM;
+    private BlockingQueue<Request> toDCS;
+    private ServerSocket socket;
+    private DeepClientServer DCS;
 
     private static DeepClientManager DM;
     private String server;
@@ -28,6 +33,7 @@ public class DeepClientManager extends Thread implements ClientThreadStuff {
         torrents = new HashMap<>();
         doneQueue = new LinkedBlockingQueue<>();
         toDM = new LinkedBlockingQueue<>();
+        toDCS = new LinkedBlockingQueue<>();
         this.fromUI = fromUI;
         this.toUI = toUI;
         server = "ada";
@@ -58,6 +64,14 @@ public class DeepClientManager extends Thread implements ClientThreadStuff {
     @Override
     public void run(){
         System.out.println("~DeepManager Started~");
+
+        try {
+            socket = new ServerSocket(clientPort);
+            DCS = new DeepClientServer(socket);
+            DCS.start();
+        } catch (IOException e ){
+            DeepLogger.log(e.getMessage());
+        }
         boolean on = true;
         while(on){ //user is not ended
 
@@ -83,6 +97,12 @@ public class DeepClientManager extends Thread implements ClientThreadStuff {
                         for(DeepTorrentManager dtm : torrents.values()){
                             BlockingQueue<Request> q = dtm.getFromDM();
                             q.add(new ShutDownRequest());
+                        }
+//                        toDCS.add(new ShutDownRequest());
+                        try {
+                            socket.close();
+                        } catch (IOException e ){
+                            DeepLogger.log(e.getMessage());
                         }
                         on = false;
                         System.out.println("~DeepManager Closed~");

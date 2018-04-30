@@ -40,15 +40,12 @@ class DeepClient {
         fromUI = new LinkedBlockingDeque<>();
         toUI = new LinkedBlockingDeque<>();
         DeepClientManager DM = DeepClientManager.getInstance(fromUI,toUI, webPort, cPort);
-        DeepClientServer DCS = new DeepClientServer();
-
         DM.start();
-        DCS.start();
+
 
         System.out.println("~DeepClient started~");
 
         menu();
-        DCS.interrupt();
     }
 
     private static void menu(){

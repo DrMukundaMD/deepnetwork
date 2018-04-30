@@ -42,12 +42,12 @@ public class DeepServerManager implements ServerThreadStuff {
     }
 
     private synchronized void openThread(){
-        DeepLogger.log("DeepServer Thread opened");
+//        DeepLogger.log("DeepServer Thread opened");
         numberOfThreads++;
     }
 
     public synchronized void closeThread(){
-        DeepLogger.log("DeepServer Thread closed");
+//        DeepLogger.log("DeepServer Thread closed");
         numberOfThreads--;
     }
 
