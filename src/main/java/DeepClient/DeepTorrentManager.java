@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DeepTorrentManager extends Thread{
     private transient BlockingQueue<Request> fromDM;
@@ -25,10 +26,13 @@ public class DeepTorrentManager extends Thread{
     private boolean on;
     private int webServerPort;
     private int clientServerPort;
+    private ConcurrentHashMap<String, Ping> pingMap;
 
-    DeepTorrentManager(String fn, String ws, int wsPort, int csPort, BlockingQueue<Request> fromDM, DeepClientManager DM){
+    DeepTorrentManager(String fn, String ws, int wsPort, int csPort, BlockingQueue<Request> fromDM,
+                       DeepClientManager DM, ConcurrentHashMap<String, Ping> pingMap){
         on = true;
         done = false;
+        this.pingMap = pingMap;
         this.DM = DM;
         webServerPort = wsPort;
         clientServerPort = csPort;
@@ -43,29 +47,23 @@ public class DeepTorrentManager extends Thread{
     public void run(){
         DeepLogger.log("~DTM " + filename + " Started~");
 
+        this.on = true;
+        this.done = false;
+
         // checks cached files or requests hash
         hashes = getHashes();
 
-        this.on = true;
-        this.done = false;
         // verifies cached segments are valid
         check();
         update();
 
-
         while(!done && on){
-            boolean cycle = false;
-            String peer = null;
-
-            if (peers.isEmpty()){
-                requestPeers();
-                cycle = true;
-            } else
-                peer = getPeer();
+//            boolean cycle = false;
+            String peer = peerAndPing();
 
 //            ping();
 
-            if(!cycle){
+            if(peer != null){
                 int segment = getNextSegment();
                 requestSegment(peer, segment);
             }
@@ -365,6 +363,54 @@ public class DeepTorrentManager extends Thread{
         }
 
         if(close){this.on = false;}
+    }
+
+    private String peerAndPing(){
+        String peer = null;
+
+        if (peers.isEmpty()){
+            requestPeers();
+        }
+
+        if(peers.checkHost(webServer))
+            return peers.getPeer();
+
+        for(String p: peers.getArray()){
+            ping(p);
+        }
+
+
+        return peer;
+    }
+
+    private void ping(String host){
+        PingRequest request = new PingRequest(System.currentTimeMillis());
+        ObjectInputStream stream  = portCycle(host, clientServerPort, request);
+
+        try {
+            Object response = stream.readObject();
+
+            if (response instanceof PingResponse) {
+                PingResponse r = (PingResponse) response;
+                long time = System.currentTimeMillis() - r.getTime();
+
+                if(pingMap.containsKey(r.getHost())){
+                    Ping ping = pingMap.get(r.getHost());
+                    ping.reset(r.getHost(), time, System.currentTimeMillis());
+                } else {
+                    Ping ping = new Ping(r.getHost(), time, System.currentTimeMillis());
+                    pingMap.put(r.getHost(), ping);
+                }
+            }
+
+            if (response instanceof UnknownRequestResponse) {
+                DeepLogger.log("Error: UnknownRequestResponse in requestSegment for torrent: " + filename);
+            }
+
+            stream.close();
+        } catch (ClassNotFoundException | IOException e) {
+            DeepLogger.log(e.getMessage());
+        }
     }
 
     private boolean checkSegments(){

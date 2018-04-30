@@ -1,6 +1,6 @@
 package DeepNetwork;
 
-public class Ping {
+public class Ping implements Comparable<Ping>{
     private String host;
     private long ping;
     private long start;
@@ -22,4 +22,13 @@ public class Ping {
     public long getStart() { return start; }
 
     public String getHost() { return host; }
+
+    public int compareTo(Ping ping){
+        if(this.ping - ping.ping < 0){
+            return -1;
+        } else if (this.ping - ping.ping > 0){
+            return 1;
+        } else
+            return 0;
+    }
 }

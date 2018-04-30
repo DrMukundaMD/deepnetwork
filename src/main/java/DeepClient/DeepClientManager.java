@@ -12,6 +12,7 @@ import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class DeepClientManager extends Thread implements ClientThreadStuff {
@@ -23,6 +24,7 @@ public class DeepClientManager extends Thread implements ClientThreadStuff {
     private BlockingQueue<Request> toDCS;
     private ServerSocket socket;
     private DeepClientServer DCS;
+    private ConcurrentHashMap<String, Ping> pingMap;
 
     private static DeepClientManager DM;
     private String server;
@@ -39,6 +41,7 @@ public class DeepClientManager extends Thread implements ClientThreadStuff {
         server = "ada";
         this.webPort = webPort;
         this.clientPort = cPort;
+        pingMap = new ConcurrentHashMap<>();
     }
 
     public static synchronized DeepClientManager getInstance(BlockingQueue<Request> fromUI,
@@ -67,7 +70,7 @@ public class DeepClientManager extends Thread implements ClientThreadStuff {
 
         try {
             socket = new ServerSocket(clientPort);
-            DCS = new DeepClientServer(socket);
+            DCS = new DeepClientServer(socket, pingMap);
             DCS.start();
         } catch (IOException e ){
             DeepLogger.log(e.getMessage());
@@ -156,7 +159,7 @@ public class DeepClientManager extends Thread implements ClientThreadStuff {
     private void startTorrent(String filename) {
         if (!torrents.containsKey(filename)) {
             DeepTorrentManager dtm = new DeepTorrentManager(filename, server, webPort, clientPort,
-                    new LinkedBlockingQueue<>(), this);
+                    new LinkedBlockingQueue<>(), this, pingMap);
             torrents.put(filename, dtm);
             dtm.start();
         }

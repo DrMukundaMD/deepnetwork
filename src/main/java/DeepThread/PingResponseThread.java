@@ -25,6 +25,7 @@ public class PingResponseThread extends Thread{
         if(pingMap.containsKey(response.getHost())){
             Ping ping = pingMap.get(response.getHost());
             ping.reset(response.getHost(), time, System.currentTimeMillis());
+            DeepLogger.log("Don't know how that happened: Ping");
         } else {
             Ping ping = new Ping(response.getHost(), time, System.currentTimeMillis());
             pingMap.put(response.getHost(), ping);

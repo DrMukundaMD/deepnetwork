@@ -9,12 +9,14 @@ import java.util.Random;
 
 public class DeepPeerManager {
     private ArrayList<String> array;
+    private ArrayList<String> priority;
     private int dead;
     private int used;
     private int last;
 
     DeepPeerManager(){
         array = new ArrayList<>();
+        priority = new ArrayList<>();
     }
 
     public void setPeers(ArrayList<String> peers){
@@ -32,8 +34,16 @@ public class DeepPeerManager {
         return used(pick);
     }
 
+    public ArrayList<String> getArray() {
+        return array;
+    }
+
     public boolean isEmpty(){
         return dead == 0;
+    }
+
+    public boolean checkHost(String webserver){
+        return array.size() == 1 && array.get(0).equals(webserver);
     }
 
     private String swap(int x, int y){
@@ -54,7 +64,6 @@ public class DeepPeerManager {
         last = used;
         return swap(index,used);
     }
-
 
     private void reset(){
 //        Queue<String> queue = new ArrayDeque<>();
