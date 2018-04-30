@@ -5,14 +5,17 @@ import DeepServer.ServerThreadStuff;
 import DeepThread.*;
 
 import java.net.ServerSocket;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DeepClientServerManager implements ServerThreadStuff {
     private static int numberOfThreads;
     private int maxThreads;
+    private ConcurrentHashMap queue;
 //    private String host;
 
-    DeepClientServerManager(int maxThreads){
+    DeepClientServerManager(int maxThreads, ConcurrentHashMap queue){
         numberOfThreads = 0;
+        this.queue = queue;
         this.maxThreads = maxThreads;
 //        this.host = "";
     }
@@ -37,7 +40,8 @@ public class DeepClientServerManager implements ServerThreadStuff {
         }
 
         if (obj instanceof Response) {
-            return new PortResponse(0);
+            Thread thread = getResponseThread((Response) obj);
+            thread.start();
         }
 
         return new PortResponse(-1);
@@ -65,6 +69,20 @@ public class DeepClientServerManager implements ServerThreadStuff {
             return new GetFileInfoThread(this, s, r);
         }
 
+        if( r instanceof PingRequest){
+            DeepLogger.log("~Request " + r.type() + "~");
+            return new PingRequestThread(this, s, r);
+        }
+
         return new UnknownRequestThread(this, s);
+    }
+
+    private Thread getResponseThread(Response r){
+        if(r instanceof PingResponse){
+            DeepLogger.log("~Response " + r.type() + "~");
+            return new PingResponseThread(this, r, queue);
+        }
+
+        return null;
     }
 }

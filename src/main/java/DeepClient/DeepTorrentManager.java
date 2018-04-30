@@ -63,6 +63,8 @@ public class DeepTorrentManager extends Thread{
             } else
                 peer = getPeer();
 
+//            ping();
+
             if(!cycle){
                 int segment = getNextSegment();
                 requestSegment(peer, segment);
@@ -151,8 +153,8 @@ public class DeepTorrentManager extends Thread{
                 DeepLogger.log(e.getMessage());
             }
         } else {
-            DeepLogger.log("~" + filename + " hashes read. Size: " + numOfSegments + "~");
             numOfSegments = hashes.size();
+            DeepLogger.log("~" + filename + " hashes read. Size: " + numOfSegments + "~");
         }
 
         return hashes;

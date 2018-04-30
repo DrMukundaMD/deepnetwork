@@ -1,5 +1,6 @@
 package DeepClient;
 
+import DeepNetwork.Ping;
 import DeepNetwork.PortResponse;
 import DeepNetwork.Request;
 import DeepServer.ServerStartup;
@@ -11,13 +12,16 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DeepClientServer extends Thread{
 //    private transient BlockingQueue<Request> fromDM;
 //    private static final int PORT = 6752;
     private ServerSocket serverSocket;
+    private ConcurrentHashMap<String, Ping> pingMap;
 
-    DeepClientServer(ServerSocket serverSocket){
+    DeepClientServer(ServerSocket serverSocket, ConcurrentHashMap pingMap){
+        this.pingMap = pingMap;
         this.serverSocket = serverSocket;
     }
 
@@ -30,7 +34,7 @@ public class DeepClientServer extends Thread{
             //serverSocket.setSoTimeout(10000); //this is 10 seconds
             PortResponse newPort;
             Socket socket;
-            DeepClientServerManager manager = new DeepClientServerManager(40);
+            DeepClientServerManager manager = new DeepClientServerManager(40, pingMap);
             DeepLogger.log("~DeepClientServer Started~");
 
             while(true){
