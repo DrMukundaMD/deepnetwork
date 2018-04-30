@@ -6,6 +6,8 @@
 -------------------------------*/
 
 import DeepClient.ClientStartup;
+import DeepClient.DeepClientServer;
+import DeepClient.DeepClientManager;
 import DeepNetwork.*;
 import DeepThread.DeepLogger;
 
@@ -17,7 +19,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 class DeepClient {
 
-    private static final int port = 6345;
+    private static final int webPort = 6345;
+    private static final int cPort = 6752;
     private static BlockingQueue<Request> fromUI;
     private static BlockingQueue<Response> toUI;
     private static ArrayList<String> torrents;
@@ -36,14 +39,16 @@ class DeepClient {
 
         fromUI = new LinkedBlockingDeque<>();
         toUI = new LinkedBlockingDeque<>();
-        DeepClient.DeepClientManager DM = DeepClient.DeepClientManager.getInstance(fromUI,toUI);
+        DeepClientManager DM = DeepClientManager.getInstance(fromUI,toUI, webPort, cPort);
+        DeepClientServer DCS = new DeepClientServer();
 
         DM.start();
+        DCS.start();
 
         System.out.println("~DeepClient started~");
 
         menu();
-
+        DCS.interrupt();
     }
 
     private static void menu(){
@@ -140,7 +145,6 @@ class DeepClient {
     }
 
     private static void exit(){
-        //todo make this loop for all active torrents
         fromUI.add(new ShutDownRequest());
         String display = "\t\t~Thank you for using DeepTorrent~\n";
         clear();

@@ -1,6 +1,5 @@
 package DeepThread;
 
-import DeepClient.ClientThreadStuff;
 import DeepServer.ServerThreadStuff;
 import DeepNetwork.GetFilePieceRequest;
 import DeepNetwork.GetFilePieceResponse;
@@ -15,17 +14,10 @@ import java.net.Socket;
 public class GetFilePieceThread extends Thread{
     private GetFilePieceRequest request;
     private ServerThreadStuff callingThread;
-    private ClientThreadStuff callingThread_;
     private ServerSocket responseSocket;
 
     public GetFilePieceThread(ServerThreadStuff callingThread, ServerSocket responseSocket, Request request){
         this.callingThread = callingThread;
-        this.responseSocket = responseSocket;
-        this.request = (GetFilePieceRequest) request;
-    }
-
-    public GetFilePieceThread(ClientThreadStuff callingThread, ServerSocket responseSocket, Request request){
-        this.callingThread_ = callingThread;
         this.responseSocket = responseSocket;
         this.request = (GetFilePieceRequest) request;
     }
@@ -52,23 +44,16 @@ public class GetFilePieceThread extends Thread{
             DeepLogger.log(e.getMessage());
         }
 
-        if(callingThread != null)
-            callingThread.closeThread();
-        else
-            callingThread_.closeThread(true, "");
+        callingThread.closeThread();
     }
 
     private GetFilePieceResponse getFilePiece(String filename, int num){
 
-        int buffer_size = 256 * 1024;
-        byte[] buffer = new byte[buffer_size];
-
+        byte[] buffer = null;
+        Gson gson = new Gson();
         File segment = new File(TorrentFolder.getSegments(), filename);
         File file = new File(segment, Integer.toString(num));
 
-        //todo hash check for fault tolerance
-
-        Gson gson = new Gson();
         try (FileReader reader = new FileReader(file)) {
             buffer = gson.fromJson(reader, byte[].class);
         }

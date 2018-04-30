@@ -21,20 +21,22 @@ public class DeepClientManager extends Thread implements ClientThreadStuff {
 
     private static DeepClientManager DM;
     private String server;
-    private int port;
+    private int webPort;
+    private int clientPort;
 
-    private DeepClientManager(BlockingQueue<Request> fromUI, BlockingQueue<Response> toUI) {
+    private DeepClientManager(BlockingQueue<Request> fromUI, BlockingQueue<Response> toUI, int webPort, int cPort) {
         torrents = new HashMap<>();
         doneQueue = new LinkedBlockingQueue<>();
         toDM = new LinkedBlockingQueue<>();
         this.fromUI = fromUI;
         this.toUI = toUI;
         server = "ada";
-        port = 6345;
+        this.webPort = webPort;
+        this.clientPort = cPort;
     }
 
     public static synchronized DeepClientManager getInstance(BlockingQueue<Request> fromUI,
-                                                             BlockingQueue<Response> toUI) {
+                                                             BlockingQueue<Response> toUI, int webPort, int cPort) {
         File file = new File(TorrentFolder.getSegments(), ".dm");
 
         if (DM == null)
@@ -48,7 +50,7 @@ public class DeepClientManager extends Thread implements ClientThreadStuff {
                     DeepLogger.log(e.getMessage());
                 }
             } else
-                DM = new DeepClientManager(fromUI, toUI);
+                DM = new DeepClientManager(fromUI, toUI, webPort, cPort);
 
         return DM;
     }
@@ -65,7 +67,7 @@ public class DeepClientManager extends Thread implements ClientThreadStuff {
                     // user.request1 (get new torrent list)
                     if (r instanceof GetTorrentListRequest) {
                         DeepLogger.log("Get Torrent List User Request");
-                        Thread t = new GetTorrentListThread(toDM, server, port);
+                        Thread t = new GetTorrentListThread(toDM, server, webPort);
                         t.start();
                     }
 
@@ -133,12 +135,22 @@ public class DeepClientManager extends Thread implements ClientThreadStuff {
 
     private void startTorrent(String filename) {
         if (!torrents.containsKey(filename)) {
-            DeepTorrentManager dtm = new DeepTorrentManager(filename, server, port, new LinkedBlockingQueue<>(), this);
+            DeepTorrentManager dtm = new DeepTorrentManager(filename, server, webPort, clientPort,
+                    new LinkedBlockingQueue<>(), this);
             torrents.put(filename, dtm);
             dtm.start();
         }
-        else
-            DeepLogger.log("DeepManager: startTorrent: Torrent Manager " + filename + " already created.");
+        else {
+            DeepTorrentManager dtm = torrents.get(filename);
+            if(isActive(dtm))
+                DeepLogger.log("DeepManager: startTorrent: Torrent Manager " + filename + " already created.");
+            else
+                dtm.start();
+        }
+    }
+
+    private boolean isActive(DeepTorrentManager dtm){
+        return dtm.isAlive();
     }
 
 }

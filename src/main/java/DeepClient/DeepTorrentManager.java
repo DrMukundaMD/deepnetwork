@@ -78,6 +78,8 @@ public class DeepTorrentManager extends Thread{
             logAsPeer();
             MergeFilePieces.merge(filename);
             DM.closeThread(true, filename);
+        } else {
+            DM.closeThread(false, filename);
         }
         System.out.println("~DTM " + filename + " Closed~");
     }

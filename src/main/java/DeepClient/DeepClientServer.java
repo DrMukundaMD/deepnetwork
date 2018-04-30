@@ -1,7 +1,6 @@
 package DeepClient;
 
 import DeepNetwork.PortResponse;
-import DeepServer.DeepServerManager;
 import DeepServer.ServerStartup;
 import DeepThread.DeepLogger;
 
@@ -11,10 +10,10 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class DeepClientServer {
+public class DeepClientServer extends Thread{
     private static final int PORT = 6752;
 
-    public static void main(String [] args) {
+    public void run() {
 
         ServerStartup.main(null);
 
@@ -23,7 +22,7 @@ public class DeepClientServer {
             //serverSocket.setSoTimeout(10000); //this is 10 seconds
             PortResponse newPort;
             Socket socket;
-            DeepClientServerManager manager = new DeepClientServerManager(20);
+            DeepClientServerManager manager = new DeepClientServerManager(40);
             DeepLogger.log("~DeepClientServer Started~");
 
             while(true){
