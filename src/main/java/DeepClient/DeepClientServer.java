@@ -13,8 +13,8 @@ import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 
 public class DeepClientServer extends Thread{
-    private transient BlockingQueue<Request> fromDM;
-    private static final int PORT = 6752;
+//    private transient BlockingQueue<Request> fromDM;
+//    private static final int PORT = 6752;
     private ServerSocket serverSocket;
 
     DeepClientServer(ServerSocket serverSocket){
@@ -26,7 +26,7 @@ public class DeepClientServer extends Thread{
         ServerStartup.main(null);
 
         try {
-            serverSocket = new ServerSocket(PORT);
+//            serverSocket = new ServerSocket(PORT);
             //serverSocket.setSoTimeout(10000); //this is 10 seconds
             PortResponse newPort;
             Socket socket;

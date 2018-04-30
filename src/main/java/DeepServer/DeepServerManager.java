@@ -77,10 +77,12 @@ public class DeepServerManager implements ServerThreadStuff {
 
     private Thread getResponseThread(Response r){
         if(r instanceof LogPeer){
+            DeepLogger.log("~Response " + r.type() + "~");
             return new LogPeerThread(peers, r);
         }
 
         if(r instanceof Log){
+            DeepLogger.log("~Response " + r.type() + "~");
             return new LogThread(r);
         }
 
