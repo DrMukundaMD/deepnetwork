@@ -46,8 +46,9 @@ public class DeepTorrentManager extends Thread{
         // checks cached files or requests hash
         hashes = getHashes();
 
+        this.on = true;
         // verifies cached segments are valid
-        check();
+        update();
 
 
         while(!done && on){
@@ -337,16 +338,19 @@ public class DeepTorrentManager extends Thread{
             }
         }
 
-        boolean done = checkSegments();
+        boolean isdone = checkSegments();
 
-        if(done){
+        if(isdone){
             check();
 
             if(checkSegments()) {
                 DeepLogger.log("~" + filename + " done.");
                 this.done = true;
+            } else{
+                this.done = false;
             }
         }
+
         if(close){this.on = false;}
     }
 

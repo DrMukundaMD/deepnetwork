@@ -53,22 +53,32 @@ public class ServerPeers {
     public void add(String filename, String hostname){
         BlockingQueue<ArrayList<String>> queue = map.get(filename);
 
-        try {
-            ArrayList<String> peers = queue.take();
+        if (queue == null){
+            queue = new LinkedBlockingQueue<>();
+            ArrayList<String> list = new ArrayList<>();
 
+            list.add(hostname);
+            queue.offer(list);
+            map.put(filename, queue);
+
+        } else {
             try {
-                String host = InetAddress.getLocalHost().getHostName();
-                if(peers.contains(host))
-                    peers.remove(host);
-            }catch (UnknownHostException e){
+                ArrayList<String> peers = queue.take();
+
+                try {
+                    String host = InetAddress.getLocalHost().getHostName();
+                    if (peers.contains(host))
+                        peers.remove(host);
+                } catch (UnknownHostException e) {
+                    DeepLogger.log(e.getMessage());
+                }
+
+                peers.add(hostname);
+                queue.offer(peers);
+
+            } catch (InterruptedException e) {
                 DeepLogger.log(e.getMessage());
             }
-
-            peers.add(hostname);
-            queue.offer(peers);
-
-        } catch (InterruptedException e){
-            DeepLogger.log(e.getMessage());
         }
     }
 }
