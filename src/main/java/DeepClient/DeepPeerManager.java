@@ -2,14 +2,12 @@ package DeepClient;
 
 import DeepThread.DeepLogger;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Queue;
-import java.util.Random;
+import java.util.*;
 
 public class DeepPeerManager {
     private ArrayList<String> array;
     private ArrayList<String> priority;
+    private int p;
     private int dead;
     private int used;
     private int last;
@@ -26,6 +24,13 @@ public class DeepPeerManager {
     }
 
     public String getPeer(){
+        if(priority != null){
+            if(p == 0)
+                p = priority.size();
+            p--;
+            return priority.get(p);
+        }
+
         if(used == 0)
             reset();
 
@@ -34,8 +39,13 @@ public class DeepPeerManager {
         return used(pick);
     }
 
-    public ArrayList<String> getArray() {
-        return array;
+    public List<String> getArray() {
+        return array.subList(0,dead);
+    }
+
+    public void setPriority(ArrayList<String> priority){
+        this.priority = priority;
+        p = priority.size();
     }
 
     public boolean isEmpty(){

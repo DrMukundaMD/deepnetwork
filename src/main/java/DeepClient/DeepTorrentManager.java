@@ -10,6 +10,8 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,7 +28,10 @@ public class DeepTorrentManager extends Thread{
     private boolean on;
     private int webServerPort;
     private int clientServerPort;
+    private long lastPing;
+    private static long pingResetTime = 60000;
     private ConcurrentHashMap<String, Ping> pingMap;
+    private Queue<Ping> pingQueue;
 
     DeepTorrentManager(String fn, String ws, int wsPort, int csPort, BlockingQueue<Request> fromDM,
                        DeepClientManager DM, ConcurrentHashMap<String, Ping> pingMap){
@@ -41,12 +46,13 @@ public class DeepTorrentManager extends Thread{
         this.filename = fn;
         peers = new DeepPeerManager();
         startup();
+        pingQueue = new PriorityQueue<>();
     }
 
     @Override
     public void run(){
         DeepLogger.log("~DTM " + filename + " Started~");
-
+        lastPing = 0;
         this.on = true;
         this.done = false;
 
@@ -366,7 +372,7 @@ public class DeepTorrentManager extends Thread{
     }
 
     private String peerAndPing(){
-        String peer = null;
+        String peer;
 
         if (peers.isEmpty()){
             requestPeers();
@@ -375,10 +381,30 @@ public class DeepTorrentManager extends Thread{
         if(peers.checkHost(webServer))
             return peers.getPeer();
 
-        for(String p: peers.getArray()){
-            ping(p);
+        if(lastPing == 0 || System.currentTimeMillis() - lastPing > pingResetTime){
+
+            for(String p: peers.getArray()){
+                ping(p);
+                pingQueue.add(pingMap.get(p));
+            }
+
+            lastPing = System.currentTimeMillis();
+
+            int count = 0;
+            ArrayList<String> list = null;
+
+            while(count < 4 && pingQueue.size() > 0){
+                list = new ArrayList<>();
+                Ping ping = pingQueue.poll();
+                list.add(ping.getHost());
+                DeepLogger.log("Host: " + ping.getHost() + " Ping: " + ping.getPing());
+                count++;
+            }
+
+            peers.setPriority(list);
         }
 
+        peer = peers.getPeer();
 
         return peer;
     }
@@ -392,7 +418,7 @@ public class DeepTorrentManager extends Thread{
 
             if (response instanceof PingResponse) {
                 PingResponse r = (PingResponse) response;
-                long time = System.currentTimeMillis() - r.getTime();
+                long time = (System.currentTimeMillis() - r.getTime()) / 2;
 
                 if(pingMap.containsKey(r.getHost())){
                     Ping ping = pingMap.get(r.getHost());
