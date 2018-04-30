@@ -86,7 +86,7 @@ public class DeepTorrentManager extends Thread{
 
     // -- Segments --
 
-    private void addSegment(int num, byte[] segment){
+    private void addSegment(int num, byte[] segment, String host){
         if(DeepHash.compareHash(segment, hashes.get(num))) {
             Gson gson = new Gson();
             File segmentFolder = new File(TorrentFolder.getSegments(), filename);
@@ -99,9 +99,9 @@ public class DeepTorrentManager extends Thread{
             }
             segmentFlags[num] = true;
             writeFlags(segmentFlags);
-            DeepLogger.log("~Segment # " + num + " downloaded~");
+            DeepLogger.log("~Segment # " + num + " downloaded from " + host + "~");
         }else{
-            DeepLogger.log("~Segment #" + num + " corrupted~");
+            DeepLogger.log("~Segment #" + num + " corrupted from " + host + "~");
         }
     }
 
@@ -166,7 +166,7 @@ public class DeepTorrentManager extends Thread{
 
                     if (response instanceof GetFilePieceResponse) {
                         GetFilePieceResponse r = (GetFilePieceResponse) response;
-                        addSegment(r.getPiece(), r.getSegment());
+                        addSegment(r.getPiece(), r.getSegment(), host);
                     }
 
                     if (response instanceof UnknownRequestResponse) {
