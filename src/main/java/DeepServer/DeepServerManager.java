@@ -77,13 +77,11 @@ public class DeepServerManager implements ServerThreadStuff {
 
     private Thread getResponseThread(Response r){
         if(r instanceof LogPeer){
-            LogPeer lp = (LogPeer) r;
-            // todo this is a blocked call. may slow down execution or block indef
-            peers.add(lp.getFilename(),lp.getHostname());
+            return new LogPeerThread(peers, r);
         }
 
         if(r instanceof Log){
-            DeepLogger.log(((Log) r).getLog());
+            return new LogThread(r);
         }
 
         return null;
