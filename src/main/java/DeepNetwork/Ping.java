@@ -23,12 +23,8 @@ public class Ping implements Comparable<Ping>{
 
     public String getHost() { return host; }
 
+    @Override
     public int compareTo(Ping ping){
-        if(this.ping - ping.ping < 0){
-            return -1;
-        } else if (this.ping - ping.ping > 0){
-            return 1;
-        } else
-            return 0;
+        return (int) (this.ping - ping.getPing());
     }
 }

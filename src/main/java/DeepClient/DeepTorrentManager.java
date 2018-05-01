@@ -400,6 +400,8 @@ public class DeepTorrentManager extends Thread{
                 }
             }
 
+            DeepLogger.log("pingQueue: " + pingQueue.toString());
+
             lastPing = System.currentTimeMillis();
 
             int count = 0;
