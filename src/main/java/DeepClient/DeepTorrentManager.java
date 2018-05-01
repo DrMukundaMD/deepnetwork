@@ -392,8 +392,10 @@ public class DeepTorrentManager extends Thread{
 
                 // ping if we haven't before || if the ping is old
                 if(ping == null || System.currentTimeMillis() - ping.getStart() > pingResetTime * 4) {
-                    if(ping(p))
+                    if(ping(p)) {
+                        ping = pingMap.get(p);
                         pingQueue.add(ping);
+                    }
                 }
             }
 
