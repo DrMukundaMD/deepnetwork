@@ -91,7 +91,7 @@ public class DeepPeerManager {
     }
 
     private String getPriorityPeer(){
-        if(priority.size() == 0)
+        if(priority != null && priority.size() == 0)
             priority = null;
 
         if(priority == null)
