@@ -1,4 +1,4 @@
-# ~DeepNetwork~
+# DeepNetwork
 
 ## Synopsis
 DeepNetwork is a torrent build. It aims to propose changing the method of peer selection for torrent to prioritize network ping.
