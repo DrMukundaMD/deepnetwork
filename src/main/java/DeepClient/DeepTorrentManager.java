@@ -16,45 +16,40 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DeepTorrentManager extends Thread{
-    private transient BlockingQueue<Request> fromDM;
-    private transient DeepClientManager DM;
-    private ArrayList<String> hashes;
-    private boolean[] segmentFlags;
-    private DeepPeerManager peers;
-    private int numOfSegments;
-    private String filename;
-    private String webServer;
-    private boolean done;
-    private boolean on;
+    private boolean on;             // Should we still run
+    private boolean done;           // Are all segments downloaded?
+    private long lastPing;          // time of last ping
+    private String filename;        // name of the file to download
+    private String webServer;       // name of webserver
     private int webServerPort;
+    private int numOfSegments;      // number of segments in file
+    private boolean fromServer;     // flag if we are getting segments from server - signal to ping or not
     private int clientServerPort;
-    private long lastPing;
-    private static long pingResetTime = 60000;
-    private ConcurrentHashMap<String, Ping> pingMap;
-    private Queue<Ping> pingQueue;
+    private DeepPeerManager peers;  // manager for peers
+    private boolean[] segmentFlags; // flag of segment numbers
+    private ArrayList<String> hashes;// hashes of segment to verify
+    private transient DeepClientManager DM; // reference to calling thread
+    private static long pingResetTime = 60000; // how often to ping - 60000 = 1 minute
+    private ConcurrentHashMap<String, Ping> pingMap; // ping hashmap for whole system
+    private transient BlockingQueue<Request> fromDM; // To communicate with calling thread
 
     DeepTorrentManager(String fn, String ws, int wsPort, int csPort, BlockingQueue<Request> fromDM,
                        DeepClientManager DM, ConcurrentHashMap<String, Ping> pingMap){
-        on = true;
-        done = false;
-        this.pingMap = pingMap;
         this.DM = DM;
+        this.filename = fn;
+        this.webServer = ws;
+        this.fromDM = fromDM;
+        this.pingMap = pingMap;
         webServerPort = wsPort;
         clientServerPort = csPort;
-        this.fromDM = fromDM;
-        this.webServer = ws;
-        this.filename = fn;
-        peers = new DeepPeerManager();
-        startup();
-        pingQueue = new PriorityQueue<>();
     }
 
     @Override
     public void run(){
         DeepLogger.log("~DTM " + filename + " Started~");
-        lastPing = 0;
-        this.on = true;
-        this.done = false;
+
+        // Run startup functions
+        startup();
 
         // checks cached files or requests hash
         hashes = getHashes();
@@ -64,32 +59,18 @@ public class DeepTorrentManager extends Thread{
         update();
 
         while(!done && on){
-//            boolean cycle = false;
-            String peer = peerAndPing();
 
-//            ping();
+            String peer = getPeer();
 
-            if(peer != null){
-                int segment = getNextSegment();
-                requestSegment(peer, segment);
-            }
+            pingAll();
 
-//            try {
-//                sleep(10000);
-//            } catch (InterruptedException e){
-//                DeepLogger.log(e.getMessage());
-//            }
+            work(peer);
 
             update();
         }
 
-        if(done) {
-            logAsPeer();
-            MergeFilePieces.merge(filename);
-            DM.closeThread(true, filename);
-        } else {
-            DM.closeThread(false, filename);
-        }
+        shutdown();
+
         System.out.println("~DTM " + filename + " Closed~");
     }
 
@@ -195,7 +176,8 @@ public class DeepTorrentManager extends Thread{
                 stream.close();
 
             } catch (IOException e) {
-                e.printStackTrace();
+                peers.dead(host);
+                DeepLogger.log(host + " peer dead");
                 DeepLogger.log(e.getMessage());
             }
         }else{
@@ -210,6 +192,13 @@ public class DeepTorrentManager extends Thread{
     }
 
     private String getPeer(){
+
+        if (peers.isEmpty()){
+            requestPeers();
+        }
+
+        fromServer = peers.checkPeers(webServer);
+
         return peers.getPeer();
     }
 
@@ -255,6 +244,13 @@ public class DeepTorrentManager extends Thread{
 
     // -- Control --
 
+    private void work(String peer){
+        if(peer != null){
+            int segment = getNextSegment();
+            requestSegment(peer, segment);
+        }
+    }
+
     private void startup(){
         File segmentFolder = new File(TorrentFolder.getSegments(), filename);
         File torrentFolder = new File(TorrentFolder.getTorrents(), filename);
@@ -265,6 +261,22 @@ public class DeepTorrentManager extends Thread{
 
         if(!torrentFolder.isDirectory()){
             torrentFolder.mkdir();
+        }
+
+        lastPing = 0;
+        on = true;
+        done = false;
+        peers = new DeepPeerManager();
+        fromServer = false;
+    }
+
+    private void shutdown(){
+        if(done) {
+            logAsPeer();
+            MergeFilePieces.merge(filename);
+            DM.closeThread(true, filename);
+        } else {
+            DM.closeThread(false, filename);
         }
     }
 
@@ -371,21 +383,18 @@ public class DeepTorrentManager extends Thread{
         if(close){this.on = false;}
     }
 
-    private String peerAndPing(){
-        String peer;
-
-        if (peers.isEmpty()){
-            requestPeers();
-        }
-
-        if(peers.checkHost(webServer))
-            return peers.getPeer();
-
-        if(lastPing == 0 || System.currentTimeMillis() - lastPing > pingResetTime){
-
+    private void pingAll(){
+        // ping every 1 minute
+        if(lastPing == 0 || System.currentTimeMillis() - lastPing > pingResetTime && !fromServer){
+            Queue<Ping> pingQueue = new PriorityQueue<>();
             for(String p: peers.getArray()){
-                ping(p);
-                pingQueue.add(pingMap.get(p));
+                Ping ping = pingMap.get(p);
+
+                // ping if we haven't before || if the ping is old
+                if(ping == null || System.currentTimeMillis() - ping.getStart() > pingResetTime * 4) {
+                    if(ping(p))
+                        pingQueue.add(ping);
+                }
             }
 
             lastPing = System.currentTimeMillis();
@@ -393,6 +402,7 @@ public class DeepTorrentManager extends Thread{
             int count = 0;
             ArrayList<String> list = null;
 
+            // retrieve the top 4 peers
             while(count < 4 && pingQueue.size() > 0){
                 list = new ArrayList<>();
                 Ping ping = pingQueue.poll();
@@ -401,15 +411,12 @@ public class DeepTorrentManager extends Thread{
                 count++;
             }
 
+            // save peers
             peers.setPriority(list);
         }
-
-        peer = peers.getPeer();
-
-        return peer;
     }
 
-    private void ping(String host){
+    private boolean ping(String host){
         PingRequest request = new PingRequest(System.currentTimeMillis());
         ObjectInputStream stream  = portCycle(host, clientServerPort, request);
 
@@ -432,11 +439,15 @@ public class DeepTorrentManager extends Thread{
             if (response instanceof UnknownRequestResponse) {
                 DeepLogger.log("Error: UnknownRequestResponse in requestSegment for torrent: " + filename);
             }
-
             stream.close();
+            return true;
         } catch (ClassNotFoundException | IOException e) {
+            peers.dead(host);
+            DeepLogger.log(host + " peer dead");
             DeepLogger.log(e.getMessage());
         }
+
+        return false;
     }
 
     private boolean checkSegments(){

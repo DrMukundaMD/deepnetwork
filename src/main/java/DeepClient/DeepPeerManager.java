@@ -2,7 +2,12 @@ package DeepClient;
 
 import DeepThread.DeepLogger;
 
-import java.util.*;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 
 public class DeepPeerManager {
     private ArrayList<String> array;
@@ -10,7 +15,6 @@ public class DeepPeerManager {
     private int p;
     private int dead;
     private int used;
-    private int last;
 
     DeepPeerManager(){
         array = new ArrayList<>();
@@ -24,19 +28,12 @@ public class DeepPeerManager {
     }
 
     public String getPeer(){
-        if(priority != null){
-            if(p == 0)
-                p = priority.size();
-            p--;
-            return priority.get(p);
-        }
+        String peer = getPriorityPeer();
 
-        if(used == 0)
-            reset();
+        if(peer != null)
+            return peer;
 
-        Random rand = new Random();
-        int pick = rand.nextInt(used);
-        return used(pick);
+        return getRandomPeer();
     }
 
     public List<String> getArray() {
@@ -52,8 +49,30 @@ public class DeepPeerManager {
         return dead == 0;
     }
 
-    public boolean checkHost(String webserver){
-        return array.size() == 1 && array.get(0).equals(webserver);
+    public boolean checkPeers(String webserver){
+
+        try {
+            String host = InetAddress.getLocalHost().getHostName();
+            if(array.remove(host))
+                DeepLogger.log("Cannot download something from yourself");
+
+        } catch (IOException e){
+            DeepLogger.log(e.getMessage());
+        }
+
+        return array.size() == 1 && array.contains(webserver);
+    }
+
+    public void dead(String host){
+        if(dead != 0) {
+            int index = array.indexOf(host);
+            if(index < dead) {
+                dead--;
+                swap(index, dead);
+            } else
+                DeepLogger.log("Host already dead");
+        } else
+            DeepLogger.log("Out of peers");
     }
 
     private String swap(int x, int y){
@@ -61,25 +80,25 @@ public class DeepPeerManager {
         return array.set(x, temp);
     }
 
-    private void dead(){
-        if(dead != 0) {
-            dead--;
-            swap(last, dead);
-        } else
-            DeepLogger.log("Error in DeepPeerManager");
-    }
+    private String getRandomPeer(){
+        if(used == 0)
+            used = dead;
 
-    private String used(int index){
+        Random rand = new Random();
+        int index = rand.nextInt(used);
         used--;
-        last = used;
         return swap(index,used);
     }
 
-    private void reset(){
-//        Queue<String> queue = new ArrayDeque<>();
-//        for(int i = used; i < dead; i++){
-//            queue.add(array.get(i));
-//        }
-        used = dead;
+    private String getPriorityPeer(){
+        if(priority == null)
+            return null;
+
+        if(p == 0)
+            p = priority.size();
+
+        p--;
+        return priority.get(p);
     }
+
 }
