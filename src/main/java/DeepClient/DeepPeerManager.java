@@ -18,7 +18,7 @@ public class DeepPeerManager {
 
     DeepPeerManager(){
         array = new ArrayList<>();
-        priority = new ArrayList<>();
+        priority = null;
     }
 
     public void setPeers(ArrayList<String> peers){
@@ -91,10 +91,13 @@ public class DeepPeerManager {
     }
 
     private String getPriorityPeer(){
+        if(priority.size() == 0)
+            priority = null;
+
         if(priority == null)
             return null;
 
-        if(p == 0)
+        if(p <= 0)
             p = priority.size();
 
         p--;
