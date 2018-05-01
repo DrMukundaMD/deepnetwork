@@ -37,9 +37,7 @@ public class DeepPeerManager {
         return array.subList(0,dead);
     }
 
-    public void setPriority(Collection<String> priority){
-        this.priority = new LinkedList<>(priority);
-    }
+    public void setPriority(Collection<String> priority){ this.priority = new LinkedList<>(priority); }
 
     public boolean isEmpty(){
         return dead == 0;

@@ -400,16 +400,13 @@ public class DeepTorrentManager extends Thread{
                 }
             }
 
-            DeepLogger.log("pingQueue: " + pingQueue.toString());
-
             lastPing = System.currentTimeMillis();
 
             int count = 0;
-            ArrayList<String> list = null;
+            ArrayList<String> list = new ArrayList<>();
 
             // retrieve the top 4 peers
             while(count < 4 && pingQueue.size() > 0){
-                list = new ArrayList<>();
                 Ping ping = pingQueue.poll();
                 list.add(ping.getHost());
                 count++;
