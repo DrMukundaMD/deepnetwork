@@ -49,8 +49,13 @@ public class DeepPeerManager {
 
         try {
             String host = InetAddress.getLocalHost().getHostName();
-            if(array.remove(host))
+            if(array.remove(host)) {
                 DeepLogger.log("Cannot download something from yourself");
+                if(used > array.size())
+                    used--;
+                if(dead > array.size())
+                    dead--;
+            }
 
         } catch (IOException e){
             DeepLogger.log(e.getMessage());
