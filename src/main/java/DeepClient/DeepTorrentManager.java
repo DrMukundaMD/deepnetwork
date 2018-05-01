@@ -394,6 +394,7 @@ public class DeepTorrentManager extends Thread{
                 if(ping == null || System.currentTimeMillis() - ping.getStart() > pingResetTime * 4) {
                     if(ping(p)) {
                         ping = pingMap.get(p);
+                        DeepLogger.log("Host: " + ping.getHost() + " Ping: " + ping.getPing());
                         pingQueue.add(ping);
                     }
                 }
@@ -409,7 +410,6 @@ public class DeepTorrentManager extends Thread{
                 list = new ArrayList<>();
                 Ping ping = pingQueue.poll();
                 list.add(ping.getHost());
-                DeepLogger.log("Host: " + ping.getHost() + " Ping: " + ping.getPing());
                 count++;
             }
 

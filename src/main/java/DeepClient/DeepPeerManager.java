@@ -4,15 +4,12 @@ import DeepThread.DeepLogger;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 
 public class DeepPeerManager {
     private ArrayList<String> array;
-    private ArrayList<String> priority;
-    private int p;
+    private Queue<String> priority;
     private int dead;
     private int used;
 
@@ -40,9 +37,8 @@ public class DeepPeerManager {
         return array.subList(0,dead);
     }
 
-    public void setPriority(ArrayList<String> priority){
-        this.priority = priority;
-        p = priority.size();
+    public void setPriority(Collection<String> priority){
+        this.priority = new LinkedList<>(priority);
     }
 
     public boolean isEmpty(){
@@ -91,17 +87,17 @@ public class DeepPeerManager {
     }
 
     private String getPriorityPeer(){
-        if(priority != null && priority.size() == 0)
-            priority = null;
-
+        // if queue does not exist
         if(priority == null)
             return null;
 
-        if(p <= 0)
-            p = priority.size();
+        String peer = priority.poll();
 
-        p--;
-        return priority.get(p);
+        // if queue is empty
+        if(peer != null)
+            priority.add(peer);
+
+        return peer;
     }
 
 }
