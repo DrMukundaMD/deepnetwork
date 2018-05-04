@@ -9,7 +9,7 @@ To run:
 1. Navigate to the ```exe/deepnetwork-server/bin``` or ```exe/deepnetwork-client/bin``` directories
 2. Execute the deepnetwork script via the command ```./deepnetwork```
   
-  * To run the server
+  * To run the server (Note: clients default server is 'ada'. i.e. run server on ada.)
   1. Move any files to be torrented to ```deepnetwork-server/bin/to_torrent```
   2. In ```deepnetwork-server/bin```, run ```./deepnetwork```
   All files will be segmented and hashed.
